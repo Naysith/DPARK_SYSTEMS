@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <p>Welcome, {{ session['nama_pengguna'] }}!</p>
+
+  <h2>Manajemen Data</h2>
+  <ul>
+    <li><a href="{{ url_for('users_list') }}">Kelola Pengguna</a></li>
+    <li><a href="{{ url_for('wahana_list') }}">Kelola Wahana</a></li>
+    <li><a href="{{ url_for('sesi_list') }}">Kelola Sesi</a></li>
+    <li><a href="{{ url_for('reservasi_list') }}">Lihat Reservasi</a></li>
+  </ul>
+
+  <br>
+  <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

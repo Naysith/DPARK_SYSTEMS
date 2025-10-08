@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from app import mysql
 
@@ -59,19 +59,24 @@ def login_user(form):
     user = cur.fetchone()
     print("USER DATA:", user)
     cur.close()
+
     if user and check_password_hash(user[3], password):
         session['id_pengguna'] = user[0]
         session['nama_pengguna'] = user[1]
         session['peran'] = user[4]
         flash('Login berhasil!')
+
+        # Redirect based on user role
         if user[4] == 'admin':
-            return redirect(url_for('users_list'))
+            return redirect(url_for('admin_dashboard'))
         elif user[4] == 'staff':
             return redirect(url_for('validasi'))
         else:
             return redirect(url_for('reservasi_list'))
+
     flash('Email atau password salah!')
     return redirect(url_for('login'))
+
 
 def register_user(form):
     nama = form['nama_pengguna']
@@ -215,6 +220,19 @@ def add_sesi(form):
     harga = form['harga']
     waktu_mulai = parse_datetime_local(form['waktu_mulai'])
     waktu_selesai = parse_datetime_local(form['waktu_selesai'])
+
+    # Convert to datetime objects
+    start_dt = datetime.strptime(waktu_mulai, "%Y-%m-%d %H:%M:%S")
+    end_dt = datetime.strptime(waktu_selesai, "%Y-%m-%d %H:%M:%S")
+
+    # Check: sesi cannot be more than 3 months in the future
+    now = datetime.now()
+    max_allowed = now + timedelta(days=90)
+
+    if start_dt > max_allowed or end_dt > max_allowed:
+        flash('Sesi tidak boleh lebih dari 3 bulan dari sekarang!', 'danger')
+        return redirect(url_for('sesi_add'))
+
     cur = mysql.connection.cursor()
     cur.execute("""
         INSERT INTO sesi (id_wahana, nama_sesi, kuota, harga, waktu_mulai, waktu_selesai)
@@ -222,9 +240,8 @@ def add_sesi(form):
     """, (id_wahana, nama_sesi, kuota, harga, waktu_mulai, waktu_selesai))
     mysql.connection.commit()
     cur.close()
-    flash('Sesi ditambahkan!')
+    flash('Sesi berhasil ditambahkan!')
     return redirect(url_for('sesi_list'))
-
 
 # ===============================
 # RESERVASI

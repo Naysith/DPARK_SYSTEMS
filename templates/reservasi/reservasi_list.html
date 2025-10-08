@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Reservasi</title></head>
+<body>
+  <h1>Daftar Reservasi</h1>
+  <a href="{{ url_for('reservasi_add') }}">Tambah Reservasi</a>
+  <ul>
+    {% for r in reservasi %}
+      <li>ID: {{ r[0] }} | Total: {{ r[2] }} | Status: {{ r[3] }} | Tanggal: {{ r[4] }}</li>
+    {% else %}
+      <li>Belum ada reservasi.</li>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

@@ -65,6 +65,14 @@ def users_delete(id):
     return delete_user(id)
 
 
+# ---------------- ADMIN DASHBOARD ----------------
+@app.route('/admin')
+@login_required
+@role_required('admin')
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+
 # ---------------- WAHANA ----------------
 @app.route('/wahana')
 @login_required
@@ -84,9 +92,10 @@ def wahana_add():
 # ---------------- SESI ----------------
 @app.route('/sesi')
 @login_required
+@role_required('admin')
 def sesi_list():
-    sesi = get_sesi()
-    return render_template('sesi/list.html', sesi=sesi)
+    data = get_sesi()
+    return render_template('sesi_list.html', sesi=data)
 
 @app.route('/sesi/add', methods=['GET', 'POST'])
 @login_required
@@ -94,25 +103,25 @@ def sesi_list():
 def sesi_add():
     if request.method == 'POST':
         return add_sesi(request.form)
-    wahana = get_wahana()
-    return render_template('sesi/form.html', wahana=wahana)
+    wahana_data = get_wahana()
+    return render_template('sesi_add.html', wahana=wahana_data)
 
 
 # ---------------- RESERVASI ----------------
 @app.route('/reservasi')
 @login_required
 def reservasi_list():
-    reservasi = get_reservasi(session)
-    return render_template('reservasi/list.html', reservasi=reservasi)
+    data = get_reservasi(session)
+    return render_template('reservasi/reservasi_list.html', reservasi=data)
 
 @app.route('/reservasi/add', methods=['GET', 'POST'])
 @login_required
-@role_required('pelanggan', 'admin')
 def reservasi_add():
     if request.method == 'POST':
         return add_reservasi(request.form, session)
-    sesi = get_sesi(available_only=True)
-    return render_template('reservasi/form.html', sesi=sesi)
+    # for GET → show form with available sesi
+    sesi_data = get_sesi(available_only=True)
+    return render_template('reservasi/reservasi_add.html', sesi=sesi_data)
 
 
 # ---------------- PEMBAYARAN ----------------
