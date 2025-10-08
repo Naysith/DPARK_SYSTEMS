@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     id_pengguna INT AUTO_INCREMENT PRIMARY KEY,
     nama_pengguna VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(20) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     peran ENUM('admin','staff','pelanggan') NOT NULL,
     nomor_telepon VARCHAR(20),
     alamat_rumah VARCHAR(255)
@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS pembayaran (
     tanggal_bayar DATETIME DEFAULT CURRENT_TIMESTAMP,
     jumlah_bayar INT,
     metode_pembayaran ENUM('BANK','QRIS'),
-    FOREIGN KEY (id_reservasi) REFERENCES reservasi(id_reservasi)
+    FOREIGN KEY (id_reservasi) REFERENCES reservasi(id_reservasi) ON DELETE CASCADE
+
 );
 
 CREATE TABLE IF NOT EXISTS tiket (
