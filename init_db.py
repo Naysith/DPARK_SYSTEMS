@@ -7,14 +7,14 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'themepark'
+app.config['MYSQL_DB'] = 'delispark'
 app.config['MYSQL_PORT'] = 3306
 
 mysql = MySQL(app)
 
 # --- Your schema creation SQL ---
 schema = """
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS pengguna (
     id_pengguna INT AUTO_INCREMENT PRIMARY KEY,
     nama_pengguna VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
