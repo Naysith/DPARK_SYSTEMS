@@ -3,26 +3,38 @@ from app import mysql
 from app.utils.helpers import parse_datetime_local
 
 # ---------------- GET SESSIONS ----------------
-def get_sesi(id=None):
+from datetime import datetime
+
+def get_sesi_grouped():
+    """
+    Returns sessions grouped by wahana → month → day.
+    """
     cur = mysql.connection.cursor()
-    if id:
-        cur.execute("""
-            SELECT s.id_sesi, w.nama_wahana, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai
-            FROM sesi s 
-            JOIN wahana w ON s.id_wahana = w.id_wahana
-            WHERE s.id_sesi = %s
-        """, (id,))
-        data = cur.fetchone()
-    else:
-        cur.execute("""
-            SELECT s.id_sesi, w.nama_wahana, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai
-            FROM sesi s 
-            JOIN wahana w ON s.id_wahana = w.id_wahana
-            ORDER BY s.waktu_mulai DESC
-        """)
-        data = cur.fetchall()
+    cur.execute("""
+        SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga,
+               s.waktu_mulai, s.waktu_selesai, w.nama_wahana
+        FROM sesi s
+        JOIN wahana w ON s.id_wahana = w.id_wahana
+        ORDER BY w.nama_wahana, s.waktu_mulai
+    """)
+    rows = cur.fetchall()
     cur.close()
-    return data
+
+    grouped = {}
+    for row in rows:
+        wahana_name = row[6]
+        date = row[4].date() if row[4] else None
+        if not date:
+            continue
+
+        month_key = date.strftime("%Y-%m")   # e.g. 2025-10
+        day_key = date.strftime("%Y-%m-%d")  # e.g. 2025-10-08
+
+        grouped.setdefault(wahana_name, {})
+        grouped[wahana_name].setdefault(month_key, {})
+        grouped[wahana_name][month_key].setdefault(day_key, []).append(row)
+
+    return grouped
 
 # ---------------- ADD SESSION ----------------
 def add_sesi(form):
