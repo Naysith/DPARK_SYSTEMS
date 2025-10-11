@@ -6,4 +6,4 @@ class Config:
     MYSQL_USER = 'root'
     MYSQL_PASSWORD = 'root'
     MYSQL_DB = 'delispark'
-    MYSQL_PORT = 3306  # adjust if Laragon uses a different port
+    MYSQL_PORT = 3306

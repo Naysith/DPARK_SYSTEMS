@@ -20,3 +20,15 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return wrapper
     return decorator
+
+def parse_datetime_local(value):
+    """
+    Converts HTML datetime-local input (YYYY-MM-DDTHH:MM)
+    into a format compatible with MySQL (YYYY-MM-DD HH:MM:SS)
+    """
+    if not value:
+        return None
+    v = value.replace('T', ' ')
+    if len(v) == 16:
+        v += ":00"  # ensure seconds
+    return v

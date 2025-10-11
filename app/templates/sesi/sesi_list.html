@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kelola Sesi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">Daftar Sesi Wahana</h2>
+    <a href="{{ url_for('sesi_bp.sesi_add') }}" class="btn btn-primary mb-3">Tambah Sesi</a>
+    <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-secondary mb-3">Kembali</a>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">
+          {% for msg in messages %}
+            {{ msg }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Wahana</th>
+          <th>Nama Sesi</th>
+          <th>Kuota</th>
+          <th>Harga</th>
+          <th>Mulai</th>
+          <th>Selesai</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sesi %}
+        <tr>
+          <td>{{ s[0] }}</td>
+          <td>{{ s[1] }}</td>
+          <td>{{ s[2] }}</td>
+          <td>{{ s[3] }}</td>
+          <td>Rp {{ "{:,.0f}".format(s[4]) }}</td>
+          <td>{{ s[5] }}</td>
+          <td>{{ s[6] }}</td>
+          <td>
+            <a href="{{ url_for('sesi_bp.sesi_edit', id=s[0]) }}" class="btn btn-warning btn-sm">Edit</a>
+            <a href="{{ url_for('sesi_bp.sesi_delete', id=s[0]) }}" class="btn btn-danger btn-sm"
+               onclick="return confirm('Yakin ingin menghapus sesi ini?');">Hapus</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted">Belum ada sesi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

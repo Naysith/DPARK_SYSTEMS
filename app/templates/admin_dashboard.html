@@ -9,11 +9,13 @@
   <p>Welcome, {{ session['nama_pengguna'] }} ({{ session['peran'] }})</p>
 
   <ul>
-    <li><a href="#">Kelola Pengguna</a></li>
+    <li><a href="{{ url_for('user_bp.users_list') }}">Kelola Pengguna</a></li>
     <li><a href="#">Kelola Wahana</a></li>
-    <li><a href="#">Kelola Sesi</a></li>
+    <li><a href="{{ url_for('sesi_bp.sesi_list') }}">Kelola Sesi</a></li>
     <li><a href="#">Lihat Reservasi</a></li>
+    <li><a href="{{ url_for('admin_bp.generate_sesi_auto') }}">Generate Sesi Otomatis</a></li>
   </ul>
+  
 
   <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
 </body>
