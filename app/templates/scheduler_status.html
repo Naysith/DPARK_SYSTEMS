@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scheduler Status | DelisPark</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f6fa;
+      color: #333;
+      margin: 2em;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      padding: 2em;
+    }
+    h2 {
+      text-align: center;
+      color: #2f3640;
+    }
+    .status {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5em 0;
+      border-bottom: 1px solid #eee;
+    }
+    .status:last-child {
+      border-bottom: none;
+    }
+    .value {
+      font-weight: bold;
+    }
+    .running {
+      color: green;
+    }
+    .stopped {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: crimson;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 1.5em;
+      text-decoration: none;
+      color: #0984e3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Scheduler Status</h2>
+    <div class="status">
+      <span>Scheduler Running:</span>
+      <span class="value {{ 'running' if status.running else 'stopped' }}">
+        {{ 'Yes ✅' if status.running else 'No ❌' }}
+      </span>
+    </div>
+    <div class="status">
+      <span>Next Run:</span>
+      <span class="value">{{ status.next_run or 'N/A' }}</span>
+    </div>
+    <div class="status">
+      <span>Last Run:</span>
+      <span class="value">{{ status.last_run_time or 'Never' }}</span>
+    </div>
+    <div class="status">
+      <span>Last Result:</span>
+      <span class="value {{ 'success' if '✅' in (status.last_result or '') else 'error' }}">
+        {{ status.last_result or 'No data yet' }}
+      </span>
+    </div>
+    <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="back">← Back to Dashboard</a>
+  </div>
+</body>
+</html>

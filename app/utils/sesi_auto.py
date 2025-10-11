@@ -7,7 +7,6 @@ def generate_auto_sesi():
     - Each with kuota = 50
     - Add-only mode (never updates existing ones)
     """
-
     cur = mysql.connection.cursor()
 
     # 1️⃣ Fetch all rides (wahana)
