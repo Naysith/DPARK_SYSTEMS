@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kelola Pengguna</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">Daftar Pengguna</h2>
+
+    <div class="mb-3">
+      <a href="{{ url_for('user_bp.users_add') }}" class="btn btn-primary">Tambah Pengguna</a>
+      <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">
+          {% for msg in messages %}
+            {{ msg }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Peran</th>
+          <th>Nomor Telepon</th>
+          <th>Alamat</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u[0] }}</td>
+          <td>{{ u[1] }}</td>
+          <td>{{ u[2] }}</td>
+          <td>{{ u[3] }}</td>
+          <td>{{ u[4] or '-' }}</td>
+          <td>{{ u[5] or '-' }}</td>
+          <td>
+            <a href="{{ url_for('user_bp.users_edit', id=u[0]) }}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{{ url_for('user_bp.users_delete', id=u[0]) }}" 
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('Yakin ingin menghapus pengguna ini?');">
+               Hapus
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">Belum ada pengguna.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
