@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <p>Welcome, {{ session['nama_pengguna'] }} ({{ session['peran'] }})</p>
+
+  <ul>
+    <li><a href="#">Kelola Pengguna</a></li>
+    <li><a href="#">Kelola Wahana</a></li>
+    <li><a href="#">Kelola Sesi</a></li>
+    <li><a href="#">Lihat Reservasi</a></li>
+  </ul>
+
+  <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+</body>
+</html>
