@@ -1,6 +1,16 @@
 from flask import flash, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import mysql
+from app.utils.error_handler import handle_mysql_error
+
+def check_duplicate(cur, table, column, value, exclude_id=None):
+    sql = f"SELECT id_pengguna FROM {table} WHERE {column}=%s"
+    params = [value]
+    if exclude_id:
+        sql += " AND id_pengguna != %s"
+        params.append(exclude_id)
+    cur.execute(sql, params)
+    return cur.fetchone() is not None
 
 # ---------------- AUTH ----------------
 def login_user(form):
@@ -27,18 +37,25 @@ def login_user(form):
     return redirect(url_for('auth_bp.login'))
 
 def register_user(form):
-    nama = form['nama_pengguna']
-    email = form['email']
-    password = generate_password_hash(form['password'])
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        INSERT INTO users (nama_pengguna, email, password_hash, peran)
-        VALUES (%s, %s, %s, 'pelanggan')
-    """, (nama, email, password))
-    mysql.connection.commit()
-    cur.close()
-    flash('Akun berhasil dibuat! Silakan login.')
-    return redirect(url_for('auth_bp.login'))
+    try:
+        cur = mysql.connection.cursor()
+        if check_duplicate(cur, 'users', 'email', form['email']):
+            flash("❌ Email sudah digunakan!", "danger")
+            return redirect(url_for('auth_bp.register'))
+
+        nama = form['nama_pengguna']
+        email = form['email']
+        password = generate_password_hash(form['password'])
+        cur.execute("""
+            INSERT INTO users (nama_pengguna, email, password_hash, peran)
+            VALUES (%s, %s, %s, 'pelanggan')
+        """, (nama, email, password))
+        mysql.connection.commit()
+        cur.close()
+        flash('Akun berhasil dibuat! Silakan login.')
+        return redirect(url_for('auth_bp.login'))
+    except Exception as e:
+        return handle_mysql_error(e, 'auth_bp.register')
 
 def logout_user():
     session.clear()
@@ -58,49 +75,68 @@ def get_users(id=None):
     return data
 
 def add_user(form):
-    nama = form['nama_pengguna']
-    email = form['email']
-    password = generate_password_hash(form['password'])
-    peran = form['peran']
-    nomor = form.get('nomor_telepon')
-    alamat = form.get('alamat_rumah')
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        INSERT INTO users (nama_pengguna, email, password_hash, peran, nomor_telepon, alamat_rumah)
-        VALUES (%s,%s,%s,%s,%s,%s)
-    """, (nama, email, password, peran, nomor, alamat))
-    mysql.connection.commit()
-    cur.close()
-    flash('User berhasil ditambahkan!')
-    return redirect(url_for('user_bp.users_list'))
+    try:
+        cur = mysql.connection.cursor()
+        if check_duplicate(cur, 'users', 'email', form['email']):
+            flash("❌ Email sudah digunakan!", "danger")
+            return redirect(url_for('user_bp.users_add'))
+
+        nama = form['nama_pengguna']
+        email = form['email']
+        password = generate_password_hash(form['password'])
+        peran = form['peran']
+        nomor = form.get('nomor_telepon')
+        alamat = form.get('alamat_rumah')
+        cur.execute("""
+            INSERT INTO users (nama_pengguna, email, password_hash, peran, nomor_telepon, alamat_rumah)
+            VALUES (%s,%s,%s,%s,%s,%s)
+        """, (nama, email, password, peran, nomor, alamat))
+        mysql.connection.commit()
+        cur.close()
+        flash('User berhasil ditambahkan!')
+        return redirect(url_for('user_bp.users_list'))
+    except Exception as e:
+        return handle_mysql_error(e, 'user_bp.users_add')
 
 def edit_user(id, form):
-    nama = form['nama_pengguna']
-    email = form['email']
-    peran = form['peran']
-    nomor = form.get('nomor_telepon')
-    alamat = form.get('alamat_rumah')
-    password = form.get('password')
-    cur = mysql.connection.cursor()
-    if password:
-        cur.execute("""
-            UPDATE users SET nama_pengguna=%s, email=%s, password_hash=%s, peran=%s,
-                nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s
-        """, (nama, email, generate_password_hash(password), peran, nomor, alamat, id))
-    else:
-        cur.execute("""
-            UPDATE users SET nama_pengguna=%s, email=%s, peran=%s,
-                nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s
-        """, (nama, email, peran, nomor, alamat, id))
-    mysql.connection.commit()
-    cur.close()
-    flash('User diperbarui!')
-    return redirect(url_for('user_bp.users_list'))
+    try:
+        cur = mysql.connection.cursor()
+        if check_duplicate(cur, 'users', 'email', form['email'], exclude_id=id):
+            flash("❌ Email sudah digunakan!", "danger")
+            return redirect(url_for('user_bp.users_edit', id=id))
+
+        nama = form['nama_pengguna']
+        email = form['email']
+        peran = form['peran']
+        nomor = form.get('nomor_telepon')
+        alamat = form.get('alamat_rumah')
+        password = form.get('password')
+
+        if password:
+            cur.execute("""
+                UPDATE users SET nama_pengguna=%s, email=%s, password_hash=%s, peran=%s,
+                    nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s
+            """, (nama, email, generate_password_hash(password), peran, nomor, alamat, id))
+        else:
+            cur.execute("""
+                UPDATE users SET nama_pengguna=%s, email=%s, peran=%s,
+                    nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s
+            """, (nama, email, peran, nomor, alamat, id))
+
+        mysql.connection.commit()
+        cur.close()
+        flash('User diperbarui!')
+        return redirect(url_for('user_bp.users_list'))
+    except Exception as e:
+        return handle_mysql_error(e, 'user_bp.users_edit')
 
 def delete_user(id):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM users WHERE id_pengguna=%s", (id,))
-    mysql.connection.commit()
-    cur.close()
-    flash('User dihapus!')
-    return redirect(url_for('user_bp.users_list'))
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM users WHERE id_pengguna=%s", (id,))
+        mysql.connection.commit()
+        cur.close()
+        flash('User dihapus!')
+        return redirect(url_for('user_bp.users_list'))
+    except Exception as e:
+        return handle_mysql_error(e, 'user_bp.users_list')

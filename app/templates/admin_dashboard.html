@@ -12,7 +12,7 @@
     <li><a href="{{ url_for('user_bp.users_list') }}">Kelola Pengguna</a></li>
     <li><a href="{{ url_for('wahana_bp.wahana_list') }}">Kelola Wahana</a></li>
     <li><a href="{{ url_for('sesi_bp.sesi_list') }}">Kelola Sesi</a></li>
-    <li><a href="#">Lihat Reservasi</a></li>
+    <li><a href="{{ url_for('reservasi_admin_bp.reservasi_admin_list') }}">Kelola Reservasi</a></li>
     <li><a href="{{ url_for('admin_bp.generate_sesi_auto') }}">Generate Sesi Otomatis</a></li>
     <li><a href="{{ url_for('admin_bp.scheduler_status') }}">Cek Status Scheduler</a></li>
   </ul>

@@ -1,8 +1,23 @@
 from flask import Blueprint, render_template, request
 from app.utils.helpers import login_required, role_required
 from app.models.user_model import get_users, add_user, edit_user, delete_user
+from app.models.reservasi_model import get_reservasi
+from app.models.tiket_model import get_tiket
 
 user_bp = Blueprint('user_bp', __name__)
+
+# ---------------- USER PANEL ----------------
+
+@user_bp.route('/user')
+@login_required
+@role_required('pelanggan')
+def user_dashboard():
+    """
+    Simple user dashboard showing quick stats and links.
+    """
+    reservasi = get_reservasi(session)
+    tiket = get_tiket(session)
+    return render_template('user/user_dashboard.html', reservasi=reservasi, tiket=tiket)
 
 # ---------------- USERS LIST ----------------
 @user_bp.route('/users')

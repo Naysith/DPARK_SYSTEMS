@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+  <div class="container">
+    <h2>Selamat Datang, {{ session['nama_pengguna'] }}</h2>
+    <p>Peran: {{ session['peran'] }}</p>
+
+    <div class="mt-4">
+      <a href="{{ url_for('reservasi_bp.reservasi_add') }}" class="btn btn-primary">+ Buat Reservasi Baru</a>
+      <a href="{{ url_for('reservasi_bp.reservasi_list') }}" class="btn btn-outline-secondary">Lihat Semua Reservasi</a>
+      <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-danger float-end">Logout</a>
+    </div>
+
+    <hr>
+
+    <h4>Reservasi Terbaru</h4>
+    {% if reservasi %}
+      <table class="table table-bordered mt-2">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Total Harga</th>
+            <th>Status</th>
+            <th>Tanggal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reservasi %}
+          <tr>
+            <td>{{ r[0] }}</td>
+            <td>Rp {{ "{:,.0f}".format(r[1]) }}</td>
+            <td>{{ r[2] }}</td>
+            <td>{{ r[3].strftime("%Y-%m-%d %H:%M") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Tidak ada reservasi.</p>
+    {% endif %}
+
+    <hr>
+
+    <h4>Tiket Saya</h4>
+    {% if tiket %}
+      <table class="table table-bordered mt-2">
+        <thead>
+          <tr>
+            <th>Kode Tiket</th>
+            <th>Status</th>
+            <th>Wahana</th>
+            <th>Sesi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tiket %}
+          <tr>
+            <td>{{ t[0] }}</td>
+            <td>{{ t[1] }}</td>
+            <td>{{ t[2] }}</td>
+            <td>{{ t[3] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Tidak ada tiket aktif.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
