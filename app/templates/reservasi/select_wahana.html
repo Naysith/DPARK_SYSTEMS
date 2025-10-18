@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container py-4">
+  <h3>Pilih Wahana</h3>
+  <div class="row">
+    {% for w in wahana_list %}
+    <div class="col-md-4">
+      <div class="card mb-3">
+        {% if w['gambar_wahana'] %}
+          <img src="{{ url_for('wahana_bp.wahana_image', id=w['id_wahana']) }}" class="card-img-top" style="height:160px;object-fit:cover;" />
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ w['nama_wahana'] }}</h5>
+          <p class="card-text">{{ w['deskripsi'][:120] }}...</p>
+          <a href="{{ url_for('reservasi_bp.reservasi_select_date', id_wahana=w['id_wahana']) }}" class="btn btn-primary">Pilih</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

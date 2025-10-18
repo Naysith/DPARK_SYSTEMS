@@ -23,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for r in reservasi %}
+        {% for r in reservasi or [] %}
         <tr>
           <td>{{ r[0] }}</td>
           <td>{{ r[1] }}</td>

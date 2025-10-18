@@ -1,0 +1,24 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container py-4">
+  <h3>Pilih Sesi pada {{ date }}</h3>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ sesi[6] }} — {{ sesi[1] }}</h5>
+      <p>Waktu: {{ sesi[4] }} — {{ sesi[5] }}</p>
+      <p>Harga: {{ sesi[3] }} | Kuota tersisa: {{ sesi[2] }}</p>
+      <form method="post" action="{{ url_for('reservasi_bp.reservasi_confirm') }}">
+        <input type="hidden" name="id_sesi" value="{{ sesi[0] }}">
+        <input type="hidden" name="id_wahana" value="{{ id_wahana }}">
+        <div class="mb-3">
+          <label class="form-label">Jumlah Tiket</label>
+          <input type="number" name="jumlah_tiket" class="form-control" value="1" min="1" max="{{ sesi[2] }}">
+        </div>
+        <button class="btn btn-success">Konfirmasi</button>
+      </form>
+    </div>
+  </div>
+  <a href="{{ url_for('reservasi_bp.reservasi_select_date', id_wahana=id_wahana) }}" class="btn btn-secondary mt-2">Kembali</a>
+</div>
+{% endblock %}

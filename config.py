@@ -7,3 +7,9 @@ class Config:
     MYSQL_PASSWORD = 'root'
     MYSQL_DB = 'delispark'
     MYSQL_PORT = 3306
+
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')  # your email
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')  # app password

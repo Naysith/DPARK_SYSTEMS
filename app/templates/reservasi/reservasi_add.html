@@ -13,7 +13,14 @@
   <form method="POST" id="reservasiForm">
     <div class="mb-3">
       <label class="form-label">Pilih Wahana</label>
-      <select id="wahanaSelect" class="form-select" required></select>
+      <select id="wahanaSelect" class="form-select" required>
+        <option value="">-- Pilih Wahana --</option>
+        {% if wahana_list %}
+          {% for w in wahana_list %}
+            <option value="{{ w.id_wahana if w.id_wahana is defined else w[0] }}">{{ w.nama_wahana if w.nama_wahana is defined else w[1] }}</option>
+          {% endfor %}
+        {% endif %}
+      </select>
     </div>
 
     <div class="mb-3">
@@ -30,11 +37,11 @@
 
     <div class="mb-3">
       <label class="form-label">Jumlah Tiket</label>
-      <input type="number" name="jumlah" class="form-control" min="1" required>
+      <input type="number" name="jumlah_tiket" class="form-control" min="1" required>
     </div>
 
     <button type="submit" class="btn btn-success">Pesan Sekarang</button>
-    <a href="{{ url_for('reservasi_bp.reservasi_list') }}" class="btn btn-secondary">Batal</a>
+    <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary">Batal</a>
   </form>
 </div>
 
@@ -45,14 +52,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   const datePicker = document.getElementById("datePicker");
   const form = document.getElementById("reservasiForm");
 
-  // Load wahana
-  const wahanaRes = await axios.get("/api/wahana");
-  wahanaRes.data.forEach(w => {
-    const opt = document.createElement("option");
-    opt.value = w[0];
-    opt.textContent = w[1];
+  // Load wahana: clear existing options (server-side fallback) then populate from API
+  try {
+    // Reset options but keep a default placeholder
+    wahanaSelect.innerHTML = '';
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = '-- Pilih Wahana --';
+    wahanaSelect.appendChild(defaultOpt);
+
+    const wahanaRes = await axios.get("/api/wahana");
+    if (wahanaRes.data && wahanaRes.data.data && wahanaRes.data.data.length) {
+      wahanaRes.data.data.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w[0];
+        opt.textContent = w[1];
+        wahanaSelect.appendChild(opt);
+      });
+    } else {
+      const opt = document.createElement("option");
+      opt.value = '';
+      opt.textContent = 'Tidak ada wahana tersedia';
+      wahanaSelect.appendChild(opt);
+    }
+  } catch (err) {
+    console.error('Gagal memuat daftar wahana', err);
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Error memuat wahana';
     wahanaSelect.appendChild(opt);
-  });
+  }
 
   // When date changes, load sessions
   datePicker.addEventListener("change", async () => {
@@ -61,13 +90,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     sesiSelect.innerHTML = "";
 
     if (wahanaId && selectedDate) {
-      const sesiRes = await axios.get(`/api/sesi/${wahanaId}/${selectedDate}`);
-      sesiRes.data.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s[0];
-        opt.textContent = `${s[1]} — Rp ${s[3].toLocaleString()} (Kuota: ${s[2]})`;
+      try {
+        const sesiRes = await axios.get(`/api/sesi/${wahanaId}/${selectedDate}`);
+        if (sesiRes.data && sesiRes.data.data && sesiRes.data.data.length) {
+          sesiRes.data.data.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s[0];
+            opt.textContent = `${s[1]} — Rp ${s[3].toLocaleString()} (Kuota: ${s[2]})`;
+            sesiSelect.appendChild(opt);
+          });
+        } else {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Tidak ada sesi tersedia untuk tanggal ini';
+          sesiSelect.appendChild(opt);
+        }
+      } catch (err) {
+        console.error('Gagal memuat sesi', err);
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Error memuat sesi';
         sesiSelect.appendChild(opt);
-      });
+      }
     }
   });
 

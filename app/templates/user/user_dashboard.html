@@ -12,39 +12,11 @@
 
     <div class="mt-4">
       <a href="{{ url_for('reservasi_bp.reservasi_add') }}" class="btn btn-primary">+ Buat Reservasi Baru</a>
-      <a href="{{ url_for('reservasi_bp.reservasi_list') }}" class="btn btn-outline-secondary">Lihat Semua Reservasi</a>
+  <a href="{{ url_for('user_bp.user_reservasi_list') }}" class="btn btn-outline-primary ms-2">Reservasi Saya</a>
       <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-danger float-end">Logout</a>
     </div>
 
-    <hr>
-
-    <h4>Reservasi Terbaru</h4>
-    {% if reservasi %}
-      <table class="table table-bordered mt-2">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Total Harga</th>
-            <th>Status</th>
-            <th>Tanggal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in reservasi %}
-          <tr>
-            <td>{{ r[0] }}</td>
-            <td>Rp {{ "{:,.0f}".format(r[1]) }}</td>
-            <td>{{ r[2] }}</td>
-            <td>{{ r[3].strftime("%Y-%m-%d %H:%M") }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Tidak ada reservasi.</p>
-    {% endif %}
-
-    <hr>
+    
 
     <h4>Tiket Saya</h4>
     {% if tiket %}
@@ -52,9 +24,10 @@
         <thead>
           <tr>
             <th>Kode Tiket</th>
-            <th>Status</th>
+            <th>Status Tiket</th>
             <th>Wahana</th>
             <th>Sesi</th>
+            <th>Status Pembayaran</th>
           </tr>
         </thead>
         <tbody>
@@ -64,6 +37,13 @@
             <td>{{ t[1] }}</td>
             <td>{{ t[2] }}</td>
             <td>{{ t[3] }}</td>
+            <td>
+              {% if t[4] == 'selesai' %}
+                <span class="badge bg-success">sudah</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">belum</span>
+              {% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>

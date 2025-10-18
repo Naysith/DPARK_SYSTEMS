@@ -14,6 +14,17 @@
       <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
     </div>
 
+    <form method="get" class="mb-3">
+      <label for="role" class="form-label">Filter Peran:</label>
+      <select id="role" name="role" class="form-select" style="width: 200px; display: inline-block; margin-left: 8px;">
+        <option value="" {% if not current_role %}selected{% endif %}>Semua</option>
+        <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admin</option>
+        <option value="staff" {% if current_role == 'staff' %}selected{% endif %}>Staff</option>
+        <option value="pelanggan" {% if current_role == 'pelanggan' %}selected{% endif %}>Pelanggan</option>
+      </select>
+      <button type="submit" class="btn btn-outline-primary btn-sm" style="margin-left: 8px;">Filter</button>
+    </div>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div class="alert alert-info">

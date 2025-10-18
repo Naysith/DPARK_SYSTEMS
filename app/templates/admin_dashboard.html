@@ -16,7 +16,12 @@
     <li><a href="{{ url_for('admin_bp.generate_sesi_auto') }}">Generate Sesi Otomatis</a></li>
     <li><a href="{{ url_for('admin_bp.scheduler_status') }}">Cek Status Scheduler</a></li>
   </ul>
-  
+
+  <hr>
+
+  {% block content %}
+  <!-- Page content will be inserted here -->
+  {% endblock %}
 
   <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
 </body>

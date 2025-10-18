@@ -24,20 +24,20 @@
       <tbody>
         {% for w in wahana %}
         <tr>
-          <td>{{ w[0] }}</td>
-          <td>{{ w[1] }}</td>
-          <td>{{ w[2] }}</td>
-          <td>{{ w[3] }}</td>
+          <td>{{ w|col(0) }}</td>
+          <td>{{ w|col(1) }}</td>
+          <td>{{ w|col(2) }}</td>
+          <td>{{ w|col(3) }}</td>
           <td>
-            {% if w[4] %}
-              <img src="{{ url_for('static', filename='uploads/' ~ w[4]) }}" width="80">
+            {% if w|col(4) %}
+              <img src="{{ url_for('wahana_bp.wahana_image', id=w|col(0)) }}" width="80">
             {% else %}
               <span class="text-muted">-</span>
             {% endif %}
           </td>
           <td>
-            <a href="{{ url_for('wahana_bp.wahana_edit', id=w[0]) }}" class="btn btn-sm btn-warning">Edit</a>
-            <a href="{{ url_for('wahana_bp.wahana_delete', id=w[0]) }}" class="btn btn-sm btn-danger"
+            <a href="{{ url_for('wahana_bp.wahana_edit', id=w|col(0)) }}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{{ url_for('wahana_bp.wahana_delete', id=w|col(0)) }}" class="btn btn-sm btn-danger"
                onclick="return confirm('Hapus wahana ini?')">Hapus</a>
           </td>
         </tr>

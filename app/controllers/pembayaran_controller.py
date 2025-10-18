@@ -33,6 +33,8 @@ def pembayaran_add(id_reservasi):
             'jumlah_bayar': reservasi[1],
             'metode_pembayaran': request.form['metode_pembayaran']
         }
+        # Call the model function which now returns a rendered success page
         return add_pembayaran(id_reservasi, form)
 
     return render_template('pembayaran/form.html', reservasi=reservasi)
+

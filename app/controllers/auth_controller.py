@@ -16,8 +16,13 @@ def login():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        return register_user(request.form)
+        # Collect additional fields
+        form_data = request.form.to_dict()
+        form_data['nomor_telepon'] = request.form.get('nomor_telepon')
+        form_data['alamat_rumah'] = request.form.get('alamat_rumah')
+        return register_user(form_data)
     return render_template('register.html')
+
 
 @auth_bp.route('/logout')
 def logout():

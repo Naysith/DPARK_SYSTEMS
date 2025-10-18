@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import session, flash, redirect, url_for
+from flask import session, flash, redirect, url_for, current_app
 
 def login_required(f):
     @wraps(f)
@@ -14,9 +14,11 @@ def role_required(*roles):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            # Log minimal session info for debugging (avoid dumping full session)
+            current_app.logger.debug(f"session id={session.get('id_pengguna')} peran={session.get('peran')}")
             if 'peran' not in session or session['peran'] not in roles:
-                flash('Akses ditolak.')
-                return redirect(url_for('auth_bp.home'))
+                flash(f"Akses ditolak. Role Anda: {session.get('peran')}")
+                return redirect(url_for('auth_bp.login'))
             return f(*args, **kwargs)
         return wrapper
     return decorator

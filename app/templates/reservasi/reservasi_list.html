@@ -9,6 +9,7 @@
   <div class="container">
     <h2>Daftar Reservasi</h2>
     <a href="{{ url_for('reservasi_bp.reservasi_add') }}" class="btn btn-primary mb-3">+ Tambah Reservasi</a>
+    <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary mb-3 ms-2">Kembali</a>
 
     <table class="table table-bordered align-middle">
       <thead class="table-light">
@@ -20,15 +21,15 @@
         </tr>
       </thead>
       <tbody>
-        {% for r in reservasi %}
+        {% for r in reservasi or [] %}
         <tr>
-          <td>{{ r[0] }}</td>
-          <td>Rp {{ "{:,.0f}".format(r[1]) }}</td>
-          <td>{{ r[2] }}</td>
-          <td>{{ r[3].strftime("%Y-%m-%d %H:%M") }}</td>
+          <td>{{ r | col('id_reservasi') }}</td>
+          <td>Rp {{ "{:,.0f}".format(r | col('total_harga')) }}</td>
+          <td>{{ r | col('status_pembayaran') }}</td>
+          <td>{{ (r | col('tanggal_reservasi')).strftime("%Y-%m-%d %H:%M") }}</td>
           <td>
-            {% if r[2] == 'menunggu' %}
-              <a href="{{ url_for('pembayaran_bp.pembayaran_add', id_reservasi=r[0]) }}" 
+            {% if r | col('status_pembayaran') == 'menunggu' %}
+              <a href="{{ url_for('reservasi_bp.pembayaran_form', id_reservasi=r | col('id_reservasi')) }}" 
                 class="btn btn-sm btn-success">Bayar</a>
             {% else %}
               <span class="badge bg-success">Lunas</span>

@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS reservasi (
     total_harga INT,
     status_pembayaran ENUM('menunggu','selesai') DEFAULT 'menunggu',
     kode_unik VARCHAR(50),
-    FOREIGN KEY (id_pengguna) REFERENCES users(id_pengguna)
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna)
 );
 
 CREATE TABLE IF NOT EXISTS pembayaran (
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS validasi (
     id_pengguna INT NOT NULL,
     id_wahana INT NOT NULL,
     waktu_validasi DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_pengguna) REFERENCES users(id_pengguna),
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna),
     FOREIGN KEY (id_wahana) REFERENCES wahana(id_wahana)
 );
 """

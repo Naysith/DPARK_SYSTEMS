@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, url_for, redirect, flash
-from app.models.sesi_model import get_sesi_grouped, add_sesi, edit_sesi, delete_sesi
+from app.models.sesi_model import get_sesi_grouped, get_sesi_paginated, add_sesi, edit_sesi, delete_sesi
 from app.utils.helpers import login_required, role_required
 
 sesi_bp = Blueprint('sesi_bp', __name__)
@@ -8,7 +8,25 @@ sesi_bp = Blueprint('sesi_bp', __name__)
 @login_required
 @role_required('admin')
 def sesi_list():
-    grouped_sesi = get_sesi_grouped()
+    # pagination
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    rows, total = get_sesi_paginated(page=page, per_page=per_page)
+
+    # Group only the paginated rows
+    grouped_sesi = {}
+    for row in rows:
+        wahana_name = row[6]
+        date = row[4].date() if row[4] else None
+        if not date:
+            continue
+        month_key = date.strftime("%Y-%m")
+        day_key = date.strftime("%Y-%m-%d")
+        grouped_sesi.setdefault(wahana_name, {})
+        grouped_sesi[wahana_name].setdefault(month_key, {})
+        grouped_sesi[wahana_name][month_key].setdefault(day_key, []).append(row)
+
     wahana_filter = request.args.get('wahana')
     month_filter = request.args.get('month')
 
@@ -16,9 +34,9 @@ def sesi_list():
     if wahana_filter and wahana_filter in grouped_sesi:
         grouped_sesi = {wahana_filter: grouped_sesi[wahana_filter]}
 
-    # Extract all months from all wahana
+    # Extract all months from all wahana (using full dataset)
     all_months = sorted({
-        month for wahana in grouped_sesi.values() for month in wahana.keys()
+        month for wahana in get_sesi_grouped().values() for month in wahana.keys()
     })
 
     # Filter by selected month
@@ -34,7 +52,10 @@ def sesi_list():
         all_wahana=list(get_sesi_grouped().keys()),
         all_months=all_months,
         current_wahana=wahana_filter,
-        current_month=month_filter
+        current_month=month_filter,
+        page=page,
+        per_page=per_page,
+        total=total
     )
 
 
