@@ -7,6 +7,9 @@ def register_blueprints(app):
     from app.controllers.wahana_controller import wahana_bp
     from app.controllers.pembayaran_controller import pembayaran_bp
     from app.controllers.reservasi_admin_controller import reservasi_admin_bp
+    from app.controllers.staff_controller import staff_bp
+    from app.controllers.validasi_admin_controller import validasi_admin_bp
+    from app.controllers.validasi_staff_controller import validasi_staff_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
@@ -16,3 +19,6 @@ def register_blueprints(app):
     app.register_blueprint(wahana_bp)
     app.register_blueprint(pembayaran_bp)
     app.register_blueprint(reservasi_admin_bp)
+    app.register_blueprint(staff_bp)
+    app.register_blueprint(validasi_admin_bp)
+    app.register_blueprint(validasi_staff_bp)

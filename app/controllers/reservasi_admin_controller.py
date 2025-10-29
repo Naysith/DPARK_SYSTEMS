@@ -13,10 +13,17 @@ def reservasi_admin_list():
     try:
         cur = mysql.connection.cursor()
         cur.execute("""
-            SELECT r.id_reservasi, u.nama_pengguna, r.total_harga, r.status_pembayaran,
-                   DATE_FORMAT(r.tanggal_reservasi, '%%d %%M %%Y %%H:%%i') as tanggal_reservasi
+            SELECT 
+                r.id_reservasi,
+                u.nama_pengguna,
+                r.total_harga,
+                r.status_pembayaran,
+                DATE_FORMAT(r.tanggal_reservasi, '%d %M %Y %H:%i') AS tanggal_reservasi,
+                COUNT(t.id_tiket) AS jumlah_tiket
             FROM reservasi r
             JOIN pengguna u ON r.id_pengguna = u.id_pengguna
+            LEFT JOIN tiket t ON r.id_reservasi = t.id_reservasi
+            GROUP BY r.id_reservasi
             ORDER BY r.tanggal_reservasi DESC
         """)
         reservasi = cur.fetchall()

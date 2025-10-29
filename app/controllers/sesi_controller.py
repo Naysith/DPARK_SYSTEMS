@@ -8,13 +8,19 @@ sesi_bp = Blueprint('sesi_bp', __name__)
 @login_required
 @role_required('admin')
 def sesi_list():
-    # pagination
+    wahana_filter = request.args.get('wahana')
+    month_filter = request.args.get('month')
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
 
-    rows, total = get_sesi_paginated(page=page, per_page=per_page)
+    # Pass filters into your data fetch function
+    rows, total = get_sesi_paginated(
+        page=page, per_page=per_page,
+        wahana_filter=wahana_filter,
+        month_filter=month_filter
+    )
 
-    # Group only the paginated rows
+    # Group rows
     grouped_sesi = {}
     for row in rows:
         wahana_name = row[6]
@@ -23,33 +29,17 @@ def sesi_list():
             continue
         month_key = date.strftime("%Y-%m")
         day_key = date.strftime("%Y-%m-%d")
-        grouped_sesi.setdefault(wahana_name, {})
-        grouped_sesi[wahana_name].setdefault(month_key, {})
-        grouped_sesi[wahana_name][month_key].setdefault(day_key, []).append(row)
+        grouped_sesi.setdefault(wahana_name, {}).setdefault(month_key, {}).setdefault(day_key, []).append(row)
 
-    wahana_filter = request.args.get('wahana')
-    month_filter = request.args.get('month')
-
-    # Filter by wahana
-    if wahana_filter and wahana_filter in grouped_sesi:
-        grouped_sesi = {wahana_filter: grouped_sesi[wahana_filter]}
-
-    # Extract all months from all wahana (using full dataset)
-    all_months = sorted({
-        month for wahana in get_sesi_grouped().values() for month in wahana.keys()
-    })
-
-    # Filter by selected month
-    if month_filter:
-        for w, months in grouped_sesi.items():
-            grouped_sesi[w] = {
-                m: d for m, d in months.items() if m == month_filter
-            }
+    # Get global wahana/month lists for dropdowns
+    full_grouped = get_sesi_grouped()
+    all_wahana = list(full_grouped.keys())
+    all_months = sorted({month for wahana in full_grouped.values() for month in wahana.keys()})
 
     return render_template(
         'sesi/sesi_list.html',
         grouped_sesi=grouped_sesi,
-        all_wahana=list(get_sesi_grouped().keys()),
+        all_wahana=all_wahana,
         all_months=all_months,
         current_wahana=wahana_filter,
         current_month=month_filter,

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Edit Data Validasi</h2>
+
+  <form method="POST" action="{{ url_for('validasi_admin_bp.edit_validasi', id_validasi=validasi[0]) }}">
+    <div class="mb-3">
+      <label for="id_pengguna" class="form-label">Nama Staff</label>
+      <select class="form-select" id="id_pengguna" name="id_pengguna" required>
+        {% for s in staff_list %}
+        <option value="{{ s[0] }}" {% if s[0] == validasi[1] %}selected{% endif %}>
+          {{ s[1] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_wahana" class="form-label">Nama Wahana</label>
+      <select class="form-select" id="id_wahana" name="id_wahana" required>
+        {% for w in wahana_list %}
+        <option value="{{ w[0] }}" {% if w[0] == validasi[2] %}selected{% endif %}>
+          {{ w[1] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+    <a href="{{ url_for('validasi_admin_bp.validasi_admin') }}" class="btn btn-secondary">Kembali</a>
+  </form>
+</div>
+{% endblock %}

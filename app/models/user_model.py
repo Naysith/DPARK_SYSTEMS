@@ -26,14 +26,16 @@ def login_user(form):
         session['peran'] = role
 
         flash('Login berhasil!', 'success')
-
-        # ✅ Correct role-based routing
+        
         if session['peran'] == 'admin':
             return redirect(url_for('admin_bp.admin_dashboard'))
+        elif session['peran'] == 'staff':
+            return redirect(url_for('staff_bp.staff_dashboard'))
         elif session['peran'] == 'pelanggan':
             return redirect(url_for('user_bp.user_dashboard'))
         else:
             return redirect(url_for('auth_bp.home'))
+
 
     flash('Email atau password salah!', 'danger')
     return redirect(url_for('auth_bp.login'))

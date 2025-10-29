@@ -17,6 +17,7 @@
           <th>ID Reservasi</th>
           <th>Nama Pengguna</th>
           <th>Tanggal Reservasi</th>
+          <th>Jumlah Tiket</th>
           <th>Total Harga</th>
           <th>Status Pembayaran</th>
           <th>Aksi</th>
@@ -28,6 +29,7 @@
           <td>{{ r[0] }}</td>
           <td>{{ r[1] }}</td>
           <td>{{ r[4] }}</td>
+          <td>{{ r[5] }}</td> <!-- ✅ jumlah_tiket -->
           <td>Rp {{ "{:,.0f}".format(r[2]) }}</td>
           <td>
             {% if r[3] == 'selesai' %}
@@ -38,9 +40,9 @@
           </td>
           <td>
             <a href="{{ url_for('reservasi_admin_bp.reservasi_admin_delete', id=r[0]) }}" 
-               class="btn btn-danger btn-sm"
-               onclick="return confirm('Yakin ingin menghapus reservasi ini?')">
-               Hapus
+              class="btn btn-danger btn-sm"
+              onclick="return confirm('Yakin ingin menghapus reservasi ini?')">
+              Hapus
             </a>
           </td>
         </tr>

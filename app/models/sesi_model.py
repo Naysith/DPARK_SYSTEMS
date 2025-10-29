@@ -60,25 +60,50 @@ def get_sesi_grouped():
     return grouped
 
 
-def get_sesi_paginated(page=1, per_page=10):
-    """Return (rows, total_count) for sessions with pagination."""
+def get_sesi_paginated(page=1, per_page=10, wahana_filter=None, month_filter=None):
+    from app import mysql
     cur = mysql.connection.cursor()
-    # total count
-    cur.execute("SELECT COUNT(*) FROM sesi")
-    total = cur.fetchone()[0]
 
     offset = (page - 1) * per_page
-    cur.execute("""
-        SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga,
-               s.waktu_mulai, s.waktu_selesai, w.nama_wahana
+
+    base_query = """
+        SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai, w.nama_wahana
         FROM sesi s
         JOIN wahana w ON s.id_wahana = w.id_wahana
-        ORDER BY w.nama_wahana, s.waktu_mulai
-        LIMIT %s OFFSET %s
-    """, (per_page, offset))
+    """
+    conditions = []
+    params = []
+
+    if wahana_filter:
+        conditions.append("w.nama_wahana = %s")
+        params.append(wahana_filter)
+    if month_filter:
+        conditions.append("DATE_FORMAT(s.waktu_mulai, '%%Y-%%m') = %s")
+        params.append(month_filter)
+
+    if conditions:
+        base_query += " WHERE " + " AND ".join(conditions)
+
+    base_query += " ORDER BY w.nama_wahana, s.waktu_mulai LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cur.execute(base_query, params)
     rows = cur.fetchall()
+
+    # Count total for pagination
+    count_query = """
+        SELECT COUNT(*) FROM sesi s
+        JOIN wahana w ON s.id_wahana = w.id_wahana
+    """
+    if conditions:
+        count_query += " WHERE " + " AND ".join(conditions)
+    cur.execute(count_query, params[:-2])
+    total = cur.fetchone()[0]
+
     cur.close()
     return rows, total
+
+
 
 def add_sesi(form):
     try:

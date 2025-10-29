@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Data Validasi Tiket</h2>
+
+<a href="{{ url_for('validasi_admin_bp.tambah_validasi') }}" class="btn btn-primary mb-3">
+  Tambah Validasi
+</a>
+
+<table class="table table-bordered table-striped align-middle">
+  <thead class="table-dark">
+    <tr>
+      <th>ID Validasi</th>
+      <th>Nama Staff</th>
+      <th>Nama Wahana</th>
+      <th>Waktu Validasi</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in validasi %}
+    <tr>
+      <td>{{ v[0] }}</td>
+      <td>{{ v[1] }}</td>
+      <td>{{ v[2] }}</td>
+      <td>{{ v[3] }}</td>
+      <td>
+        <a href="{{ url_for('validasi_admin_bp.edit_validasi', id_validasi=v[0]) }}" class="btn btn-warning btn-sm">Edit</a>
+        <a href="{{ url_for('validasi_admin_bp.hapus_validasi', id_validasi=v[0]) }}"
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Yakin ingin menghapus data ini?')">
+           Hapus
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

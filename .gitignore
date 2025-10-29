@@ -30,3 +30,4 @@ instance/
 Thumbs.db
 
 tools/
+tests/
