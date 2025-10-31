@@ -1,16 +1,12 @@
 from flask import Flask
 from flask_mysqldb import MySQL
+from config import Config
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# MySQL config (match your main app)
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'delispark'
-app.config['MYSQL_PORT'] = 3306
- 
 mysql = MySQL(app)
+
 
 # --- Your schema creation SQL ---
 schema = """
