@@ -3,6 +3,15 @@
 {% block title %}Daftar Wahana{% endblock %}
 
 {% block content %}
+<style>
+    /* Styling untuk gambar thumbnail */
+    .img-thumb-preview {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -13,7 +22,7 @@
         </div>
     </div>
 
-    <div class="row mb-3">
+    <div class="row mb-4">
         <div class="col-md-12 d-flex justify-content-between align-items-center">
             <a href="{{ url_for('wahana_bp.wahana_add') }}" class="btn btn-primary shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Wahana Baru
@@ -29,15 +38,15 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category if category != 'success' else 'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i> {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <div class="card shadow border-0">
+    <div class="card shadow border-0 mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -55,7 +64,7 @@
                         {% for w in wahana %}
                         <tr>
                             <td class="text-center text-secondary fw-bold">{{ w[0] }}</td>
-                            <td>{{ w[1] }}</td>
+                            <td><strong class="text-dark">{{ w[1] }}</strong></td>
                             <td>{{ w[2] | truncate(100) }}</td>
                             <td class="text-center">
                                 <span class="badge 
@@ -67,25 +76,32 @@
                             <td class="text-center">
                                 {% if w[4] %}
                                     <img src="{{ url_for('wahana_bp.wahana_image', id=w[0]) }}" 
-                                         alt="Gambar {{ w[1] }}" 
-                                         class="img-thumbnail" 
-                                         width="80">
+                                        alt="Gambar {{ w[1] }}" 
+                                        class="img-thumbnail img-thumb-preview">
                                 {% else %}
-                                    <span class="text-muted"><i class="fas fa-times-circle me-1"></i> Tidak Ada</span>
+                                    <span class="text-muted small"><i class="fas fa-times-circle me-1"></i> Tidak Ada</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ url_for('wahana_bp.wahana_edit', id=w[0]) }}" 
-                                   class="btn btn-sm btn-outline-warning me-2"
-                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Wahana">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="{{ url_for('wahana_bp.wahana_delete', id=w[0]) }}" 
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('⚠️ Yakin ingin menghapus wahana {{ w[1] }}?')"
-                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Wahana">
-                                    <i class="fas fa-trash-alt"></i> Hapus
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('wahana_bp.wahana_edit', id=w[0]) }}" 
+                                        class="btn btn-sm btn-outline-warning"
+                                        title="Edit Wahana">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('wahana_bp.wahana_delete', id=w[0]) }}" 
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('⚠️ Yakin ingin menghapus wahana {{ w[1] }}?')"
+                                        title="Hapus Wahana">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-box-open me-2"></i> Belum ada data wahana yang terdaftar.
                             </td>
                         </tr>
                         {% endfor %}
@@ -94,5 +110,31 @@
             </div>
         </div>
     </div>
+    
+    {% if total_pages > 1 %}
+    <nav aria-label="Wahana Pagination">
+        <ul class="pagination justify-content-center">
+            
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('wahana_bp.wahana_list', page=page-1) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('wahana_bp.wahana_list', page=p) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+
+            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('wahana_bp.wahana_list', page=page+1) }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+
 </div>
 {% endblock %}

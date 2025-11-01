@@ -1,23 +1,119 @@
 {% extends 'index.html' %}
 
+{% block title %}Pilih Wahana Reservasi{% endblock %}
+
+{% block custom_styles %}
+<style>
+    /* Styling Wahana Card */
+    .wahana-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%; 
+    }
+    .wahana-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    .card-img-top {
+        height: 200px; 
+        object-fit: cover;
+    }
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+    .price-tag {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0d6efd; /* Biru Primer */
+        margin-top: -5px;
+        margin-bottom: 15px;
+        display: block;
+    }
+    .btn-action-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .btn-action-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0b5ed7;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <h3>Pilih Wahana</h3>
-  <div class="row">
-    {% for w in wahana_list %}
-    <div class="col-md-4">
-      <div class="card mb-3">
-        {% if w['gambar_wahana'] %}
-          <img src="{{ url_for('wahana_bp.wahana_image', id=w['id_wahana']) }}" class="card-img-top" style="height:160px;object-fit:cover;" />
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">{{ w['nama_wahana'] }}</h5>
-          <p class="card-text">{{ w['deskripsi'][:120] }}...</p>
-          <a href="{{ url_for('reservasi_bp.reservasi_select_date', id_wahana=w['id_wahana']) }}" class="btn btn-primary">Pilih</a>
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h3 class="fw-bold text-primary mb-2">
+                <i class="fas fa-ticket-alt me-2"></i> Pilih Wahana untuk Reservasi
+            </h3>
+            <p class="lead text-secondary">Pilih wahana, lalu tentukan tanggal dan sesi kunjungan Anda.</p>
+            <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-outline-secondary btn-sm mt-2">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Dashboard
+            </a>
         </div>
-      </div>
     </div>
-    {% endfor %}
-  </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for w in wahana %}
+        <div class="col">
+            <div class="card wahana-card shadow-sm">
+                
+                <div class="position-relative">
+                    {% if w['gambar_wahana'] %}
+                        <img src="{{ url_for('wahana_bp.wahana_image', id=w['id_wahana']) }}" 
+                             class="card-img-top" 
+                             alt="Gambar {{ w['nama_wahana'] }}"
+                             title="{{ w['nama_wahana'] }}"
+                             />
+                    {% else %}
+                        <div class="card-img-top d-flex justify-content-center align-items-center bg-light text-muted" style="height: 200px;">
+                            <i class="fas fa-image fa-3x"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <span class="badge status-badge 
+                        {% if w['status_wahana'] == 'aktif' %}bg-success{% else %}bg-danger{% endif %} 
+                        text-uppercase p-2">
+                        {% if w['status_wahana'] == 'aktif' %}
+                            <i class="fas fa-check-circle me-1"></i> Buka
+                        {% else %}
+                            <i class="fas fa-tools me-1"></i> Maintenance
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark mb-2">{{ w['nama_wahana'] }}</h5>
+                    
+                    <span class="price-tag">
+                        Rp. 50.000
+                        <span class="small text-muted fw-normal">/ tiket</span>
+                    </span>
+                    
+                    <p class="card-text text-muted mb-4">{{ w['deskripsi'] | truncate(100) }}</p>
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('user_bp.reservasi_select_date', id_wahana=w['id_wahana']) }}" 
+                           class="btn btn-action-primary w-100 shadow-sm">
+                           <i class="fas fa-calendar-alt me-1"></i> Pilih & Lanjutkan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-mountain fa-5x text-secondary mb-3"></i>
+            <h4 class="text-secondary">Tidak ada wahana yang tersedia untuk reservasi saat ini.</h4>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

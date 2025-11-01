@@ -11,7 +11,7 @@ def generate_auto_sesi():
     wahana_list = cur.fetchall()
 
     today = datetime.now().date()
-    end_date = today + timedelta(days=90)
+    end_date = today + timedelta(days=7)
 
     sessions_per_day = [
         ("Pagi", time(9, 0),  time(13, 0)),

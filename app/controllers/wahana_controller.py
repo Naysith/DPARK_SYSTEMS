@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.models.wahana_model import get_wahana, add_wahana, edit_wahana, delete_wahana
 from flask import send_file, abort, Response
 from app.utils.helpers import login_required, role_required
@@ -10,11 +10,49 @@ wahana_bp = Blueprint('wahana_bp', __name__)
 @login_required
 @role_required('admin')
 def wahana_list():
+    # Konfigurasi Pagination
+    PAGE_SIZE = 5  # Batas 5 wahana per halaman
+    
+    # Ambil nomor halaman dari URL, default ke halaman 1
+    page = request.args.get('page', 1, type=int)
+    offset = (page - 1) * PAGE_SIZE
+    
+    wahana = []
+    total_items = 0
+    total_pages = 0
+    
     try:
-        wahana = get_wahana()
+        from app import mysql # Asumsi koneksi MySQL ada
+        cur = mysql.connection.cursor()
+        
+        # 1. Ambil Total Wahana (untuk menghitung total halaman)
+        cur.execute("SELECT COUNT(id_wahana) FROM wahana")
+        total_items = cur.fetchone()[0]
+        
+        # Hitung total halaman (pembulatan ke atas)
+        total_pages = (total_items + PAGE_SIZE - 1) // PAGE_SIZE 
+
+        # 2. Ambil Wahana untuk Halaman Saat Ini (dengan LIMIT dan OFFSET)
+        # Ganti query di bawah ini sesuai dengan urutan kolom yang Anda butuhkan
+        # (w[0]=id_wahana, w[1]=nama, w[2]=deskripsi, w[3]=status, w[4]=gambar_wahana)
+        query = f"""
+            SELECT id_wahana, nama_wahana, deskripsi, status_wahana, gambar_wahana 
+            FROM wahana 
+            ORDER BY id_wahana DESC
+            LIMIT {PAGE_SIZE} OFFSET {offset}
+        """
+        cur.execute(query)
+        wahana = cur.fetchall()
+        cur.close()
+
     except Exception as e:
+        from app.utils.error_handler import handle_mysql_error
         return handle_mysql_error(e, 'wahana_bp.wahana_list')
-    return render_template('wahana/wahana_list.html', wahana=wahana)
+    
+    return render_template('wahana/wahana_list.html', 
+                           wahana=wahana, 
+                           page=page, 
+                           total_pages=total_pages)
 
 @wahana_bp.route('/wahana/add', methods=['GET','POST'])
 @login_required
