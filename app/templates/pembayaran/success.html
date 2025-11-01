@@ -2,55 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pembayaran Berhasil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Berhasil! | DelisPark</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body {
+            background-color: #e9ecef; /* Light background for contrast */
+        }
+        .success-card {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .success-header {
+            color: #198754; /* Warna hijau Bootstrap success */
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .pdf-viewer {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    <h1>✅ Pembayaran Berhasil!</h1>
-        <p>Pembayaran berhasil. Di bawah adalah e-ticket Anda.</p>
-        {% if pdf_file %}
-            <p><a href="{{ pdf_file }}" target="_blank">📥 Download PDF Tiket</a></p>
-            <div style="margin-top:1rem;">
-                <iframe src="{{ pdf_file }}" width="100%" height="600px"></iframe>
+
+<div class="container">
+    <div class="success-card text-center">
+        
+        <p class="success-header mb-3">
+            <i class="fas fa-check-circle me-2"></i> Pembayaran Berhasil!
+        </p>
+        <p class="lead text-muted mb-4">
+            Terima kasih, e-tiket Anda telah disiapkan. Anda dapat melihat dan mengunduhnya di bawah ini.
+        </p>
+
+        {% if sending %}
+            <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-paper-plane me-2"></i> Email sedang dikirim. Cek kotak masuk Anda sebentar lagi!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endif %}
 
-            {% if id_pembayaran %}
-                <!-- Trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmSendModal">
-                    Kirim tiket ke email saya
+        {% if pdf_file %}
+            <h5 class="text-start mb-3 text-dark">
+                <i class="fas fa-file-pdf me-2"></i> E-Ticket Anda
+            </h5>
+
+            <div class="d-grid gap-2 mb-4">
+                <a href="{{ pdf_file }}" target="_blank" class="btn btn-success btn-lg">
+                    <i class="fas fa-download me-2"></i> Unduh PDF Tiket
+                </a>
+            </div>
+
+            <div class="pdf-viewer mb-5">
+                <iframe src="{{ pdf_file }}" width="100%" height="600px" title="E-Ticket Viewer"></iframe>
+            </div>
+        {% endif %}
+
+        {% if id_pembayaran %}
+            <div class="d-flex justify-content-center gap-3">
+                
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmSendModal">
+                    <i class="fas fa-envelope me-1"></i> Kirim ulang tiket ke email saya
                 </button>
 
-                <!-- Confirmation Modal -->
-                <div class="modal fade" id="confirmSendModal" tabindex="-1" aria-labelledby="confirmSendModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="confirmSendModalLabel">Konfirmasi Pengiriman</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                Apakah Anda yakin ingin mengirim tiket ke email Anda sekarang?
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <form id="sendEmailForm" method="POST" action="{{ url_for('reservasi_bp.pembayaran_send_email', id_pembayaran=id_pembayaran) }}">
-                                    <button type="submit" class="btn btn-primary">Ya, kirim</button>
-                                </form>
-                            </div>
+                <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-home me-1"></i> Kembali ke Dashboard
+                </a>
+            </div>
+
+            <div class="modal fade" id="confirmSendModal" tabindex="-1" aria-labelledby="confirmSendModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="confirmSendModalLabel">Konfirmasi Pengiriman Email</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-start">
+                            Apakah Anda yakin ingin mengirim tiket ke email Anda sekarang? Tiket akan dikirim ke alamat email yang terdaftar pada akun ini.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <form id="sendEmailForm" method="POST" action="{{ url_for('reservasi_bp.pembayaran_send_email', id_pembayaran=id_pembayaran) }}">
+                                <button type="submit" class="btn btn-primary">Ya, kirim</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-                    {% endif %}
+            </div>
+        {% endif %}
 
-                {% if sending %}
-                    <div class="alert alert-info mt-3">Email sedang dikirim. Anda akan menerimanya sebentar lagi.</div>
-                {% endif %}
+    </div>
+</div>
 
-            <p>
-                <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
-            </p>
-
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -124,12 +124,13 @@ def delete_wahana(id):
 
 # ---------------- GETALL WAHANA ----------------
 def get_all_wahana():
-    cur = mysql.connection.cursor(DictCursor)
-    cur.execute("SELECT * FROM wahana")
+    from app import mysql
+    cur = mysql.connection.cursor()
+    # Query HANYA menggunakan kolom yang ADA di database
+    cur.execute("SELECT id_wahana, nama_wahana, deskripsi, status_wahana, gambar_wahana FROM wahana") 
     wahana = cur.fetchall()
     cur.close()
     return wahana
-
 
 # ---------------- FILE VALIDATION ----------------
 def allowed_file(filename):

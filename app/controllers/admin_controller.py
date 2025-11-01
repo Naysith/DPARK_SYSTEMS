@@ -61,15 +61,16 @@ def admin_dashboard():
         validasi_hari_ini=validasi_hari_ini,
         validasi=validasi
     )
-    
+
 @admin_bp.route('/admin/generate_sesi', endpoint='generate_sesi_auto')
 @role_required('admin')
 def generate_sesi_auto_route():
     try:
         generate_auto_sesi()
+        flash('✅ Sesi otomatis berhasil digenerate untuk semua wahana selama 90 hari ke depan!', 'success')
     except Exception as e:
-        return handle_mysql_error(e, 'admin_bp.admin_dashboard')
-    return "✅ Auto session generation complete! Check your sesi list."
+        return handle_mysql_error(e, 'admin_bp.generate_sesi_auto')
+    return redirect(url_for('wahana_bp.wahana_list'))
 
 @admin_bp.route('/admin/scheduler_status')
 @role_required('admin')

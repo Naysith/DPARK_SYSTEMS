@@ -14,9 +14,14 @@
     </div>
 
     <div class="row mb-3">
-        <div class="col-md-12">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
             <a href="{{ url_for('wahana_bp.wahana_add') }}" class="btn btn-primary shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Wahana Baru
+            </a>
+            <a href="{{ url_for('admin_bp.generate_sesi_auto') }}" 
+            class="btn btn-success shadow-sm"
+            onclick="return confirm('⚙️ Generate sesi otomatis untuk semua wahana selama 90 hari ke depan?')">
+                <i class="fas fa-sync-alt me-1"></i> Generate Sesi Auto
             </a>
         </div>
     </div>

@@ -15,9 +15,25 @@ user_bp = Blueprint('user_bp', __name__)
 def user_dashboard():
     from app.models.reservasi_model import get_reservasi_by_user
     from app.models.tiket_model import get_tiket
-    reservasi = get_reservasi_by_user(session.get('id_pengguna'))
-    tiket = get_tiket(session)
-    return render_template('user/user_dashboard.html', reservasi=reservasi, tiket=tiket)
+    
+    # Tambahkan wahana = get_all_wahana() di sini
+    try:
+        reservasi = get_reservasi_by_user(session.get('id_pengguna'))
+        tiket = get_tiket(session)
+        # 💡 PENTING: Ambil data wahana
+        wahana = get_all_wahana() 
+
+    except Exception as e:
+        # Jika ada error saat mengambil data, ini akan tertangkap
+        from app.utils.error_handler import handle_mysql_error
+        # Anda mungkin perlu menyesuaikan nama route jika terjadi error
+        return handle_mysql_error(e, 'user_bp.user_dashboard') 
+        
+    # 💡 PENTING: Pastikan wahana dilewatkan ke template
+    return render_template('user/user_dashboard.html', 
+                           reservasi=reservasi, 
+                           tiket=tiket, 
+                           wahana=wahana)
 
 
 @user_bp.route('/user/reservasi/start')
