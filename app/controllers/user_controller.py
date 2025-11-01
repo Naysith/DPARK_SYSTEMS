@@ -130,8 +130,6 @@ def users_add():
     return render_template('users/form.html')
 
 @user_bp.route('/users/edit/<int:id>', methods=['GET', 'POST'])
-
-
 @login_required
 @role_required('admin')
 def users_edit(id):

@@ -1,31 +1,56 @@
-{% extends "base.html" %}
+{% extends "admin/admin_base.html" %}
+{% block title %}Tambah Validasi Tiket{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h2 class="mb-4">Tambah Validasi Tiket</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h2 class="mb-4 text-dark">
+                <i class="fas fa-plus-circle me-2 text-success"></i> Tambah Validasi Tiket Baru
+            </h2>
+            
+            <div class="card shadow border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Formulir Entri Data Validasi</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('validasi_admin_bp.tambah_validasi') }}">
+                        
+                        <div class="mb-3">
+                            <label for="id_pengguna" class="form-label fw-bold">
+                                <i class="fas fa-user-check me-1 text-primary"></i> Nama Staff
+                            </label>
+                            <select class="form-select" id="id_pengguna" name="id_pengguna" required>
+                                <option value="" disabled selected>-- Pilih Staff --</option>
+                                {% for s in staff_list %}
+                                <option value="{{ s[0] }}">{{ s[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-  <form method="POST" action="{{ url_for('validasi_admin_bp.tambah_validasi') }}">
-    <div class="mb-3">
-      <label for="id_pengguna" class="form-label">Nama Staff</label>
-      <select class="form-select" id="id_pengguna" name="id_pengguna" required>
-        <option value="">-- Pilih Staff --</option>
-        {% for s in staff_list %}
-        <option value="{{ s[0] }}">{{ s[1] }}</option>
-        {% endfor %}
-      </select>
+                        <div class="mb-4">
+                            <label for="id_wahana" class="form-label fw-bold">
+                                <i class="fas fa-mountain me-1 text-info"></i> Nama Wahana
+                            </label>
+                            <select class="form-select" id="id_wahana" name="id_wahana" required>
+                                <option value="" disabled selected>-- Pilih Wahana --</option>
+                                {% for w in wahana_list %}
+                                <option value="{{ w[0] }}">{{ w[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-start pt-3 border-top">
+                            <button type="submit" class="btn btn-primary me-2 shadow-sm">
+                                <i class="fas fa-plus me-1"></i> Simpan Data
+                            </button>
+                            <a href="{{ url_for('validasi_admin_bp.validasi_admin') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-      <label for="id_wahana" class="form-label">Nama Wahana</label>
-      <select class="form-select" id="id_wahana" name="id_wahana" required>
-        <option value="">-- Pilih Wahana --</option>
-        {% for w in wahana_list %}
-        <option value="{{ w[0] }}">{{ w[1] }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Simpan</button>
-    <a href="{{ url_for('validasi_admin_bp.validasi_admin') }}" class="btn btn-secondary">Kembali</a>
-  </form>
 </div>
 {% endblock %}

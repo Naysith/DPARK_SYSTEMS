@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app.utils.helpers import login_required, role_required
 from app.utils.sesi_auto import generate_auto_sesi
 from app.utils.scheduler import get_scheduler_status
@@ -103,3 +103,67 @@ def validasi_admin():
         return handle_mysql_error(e, 'admin_bp.validasi_admin')
 
     return render_template('admin/validasi_admin.html', validasi=validasi)
+
+@admin_bp.route('/admin/profile', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def admin_profile():
+    try:
+        cur = mysql.connection.cursor()
+
+        if request.method == 'POST':
+            nama = request.form.get('nama_pengguna')
+            email = request.form.get('email')
+            nomor = request.form.get('nomor_telepon')
+            alamat = request.form.get('alamat_rumah')
+            password = request.form.get('password')
+
+            # Update only non-empty fields
+            if password:
+                cur.execute("""
+                    UPDATE pengguna
+                    SET nama_pengguna=%s, email=%s, nomor_telepon=%s, alamat_rumah=%s, password_hash=SHA2(%s, 256)
+                    WHERE id_pengguna=%s
+                """, (nama, email, nomor, alamat, password, session['id_pengguna']))
+            else:
+                cur.execute("""
+                    UPDATE pengguna
+                    SET nama_pengguna=%s, email=%s, nomor_telepon=%s, alamat_rumah=%s
+                    WHERE id_pengguna=%s
+                """, (nama, email, nomor, alamat, session['id_pengguna']))
+            
+            mysql.connection.commit()
+            flash('✅ Profil berhasil diperbarui!', 'success')
+            return redirect(url_for('admin_bp.admin_profile'))
+
+        # --- GET profile ---
+        cur.execute("""
+            SELECT nama_pengguna, email, nomor_telepon, alamat_rumah
+            FROM pengguna
+            WHERE id_pengguna = %s
+        """, (session['id_pengguna'],))
+        profile = cur.fetchone()
+        cur.close()
+
+    except Exception as e:
+        return handle_mysql_error(e, 'admin_bp.admin_profile')
+
+    return render_template('admin/profile.html', profile=profile)
+
+@admin_bp.route('/admin/staff')
+@login_required
+@role_required('admin')
+def admin_staff_list():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT id_pengguna, nama_pengguna, email, nomor_telepon
+            FROM pengguna
+            WHERE peran = 'staff'
+        """)
+        staff_list = cur.fetchall()
+        cur.close()
+    except Exception as e:
+        return handle_mysql_error(e, 'admin_bp.admin_staff_list')
+
+    return render_template('admin/staff_list.html', staff=staff_list)

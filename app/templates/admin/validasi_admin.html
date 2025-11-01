@@ -1,38 +1,74 @@
-{% extends "base.html" %}
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Data Validasi Tiket{% endblock %}
+
 {% block content %}
-<h2>Data Validasi Tiket</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4 text-dark">
+                <i class="fas fa-ticket-alt me-2 text-primary"></i> Data Validasi Tiket
+            </h2>
+            <p class="text-muted">Manajemen dan pengawasan log validasi tiket oleh staff.</p>
+        </div>
+    </div>
 
-<a href="{{ url_for('validasi_admin_bp.tambah_validasi') }}" class="btn btn-primary mb-3">
-  Tambah Validasi
-</a>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <a href="{{ url_for('validasi_admin_bp.tambah_validasi') }}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-1"></i> Tambah Validasi Baru
+            </a>
+            </div>
+    </div>
 
-<table class="table table-bordered table-striped align-middle">
-  <thead class="table-dark">
-    <tr>
-      <th>ID Validasi</th>
-      <th>Nama Staff</th>
-      <th>Nama Wahana</th>
-      <th>Waktu Validasi</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for v in validasi %}
-    <tr>
-      <td>{{ v[0] }}</td>
-      <td>{{ v[1] }}</td>
-      <td>{{ v[2] }}</td>
-      <td>{{ v[3] }}</td>
-      <td>
-        <a href="{{ url_for('validasi_admin_bp.edit_validasi', id_validasi=v[0]) }}" class="btn btn-warning btn-sm">Edit</a>
-        <a href="{{ url_for('validasi_admin_bp.hapus_validasi', id_validasi=v[0]) }}"
-           class="btn btn-danger btn-sm"
-           onclick="return confirm('Yakin ingin menghapus data ini?')">
-           Hapus
-        </a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="text-center">ID Validasi</th>
+                            <th scope="col">Nama Staff</th>
+                            <th scope="col">Nama Wahana</th>
+                            <th scope="col" class="text-center">Waktu Validasi</th>
+                            <th scope="col" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in validasi %}
+                        <tr>
+                            <td class="text-center text-secondary fw-bold">{{ v[0] }}</td>
+                            <td>{{ v[1] }}</td>
+                            <td><i class="fas fa-mountain me-1 text-info"></i> {{ v[2] }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary py-2 px-3">
+                                    <i class="far fa-clock me-1"></i> {{ v[3] }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('validasi_admin_bp.edit_validasi', id_validasi=v[0]) }}"
+                                   class="btn btn-sm btn-outline-warning me-2"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Data">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('validasi_admin_bp.hapus_validasi', id_validasi=v[0]) }}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('⚠️ Yakin ingin menghapus data validasi {{ v[0] }} ini?')"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Data">
+                                    <i class="fas fa-trash-alt"></i> Hapus
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not validasi %}
+            <div class="text-center p-4 text-muted border-top">
+                <i class="fas fa-info-circle me-1"></i> Belum ada data validasi yang tercatat saat ini.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

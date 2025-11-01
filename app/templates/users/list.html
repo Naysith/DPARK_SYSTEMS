@@ -1,77 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Kelola Pengguna</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-  <div class="container mt-5">
-    <h2 class="mb-4">Daftar Pengguna</h2>
+{% extends "admin/admin_base.html" %}
 
-    <div class="mb-3">
-      <a href="{{ url_for('user_bp.users_add') }}" class="btn btn-primary">Tambah Pengguna</a>
-      <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+{% block title %}Kelola Pengguna{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4 text-dark">
+                <i class="fas fa-users-cog me-2 text-primary"></i> Manajemen Pengguna
+            </h2>
+            <p class="text-muted">Kelola semua akun pengguna, termasuk Admin, Staff, dan Pelanggan.</p>
+        </div>
     </div>
 
-    <form method="get" class="mb-3">
-      <label for="role" class="form-label">Filter Peran:</label>
-      <select id="role" name="role" class="form-select" style="width: 200px; display: inline-block; margin-left: 8px;">
-        <option value="" {% if not current_role %}selected{% endif %}>Semua</option>
-        <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admin</option>
-        <option value="staff" {% if current_role == 'staff' %}selected{% endif %}>Staff</option>
-        <option value="pelanggan" {% if current_role == 'pelanggan' %}selected{% endif %}>Pelanggan</option>
-      </select>
-      <button type="submit" class="btn btn-outline-primary btn-sm" style="margin-left: 8px;">Filter</button>
+    <div class="row mb-3">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <a href="{{ url_for('user_bp.users_add') }}" class="btn btn-success shadow-sm">
+                <i class="fas fa-user-plus me-1"></i> Tambah Pengguna Baru
+            </a>
+        </div>
+        <div class="col-md-8">
+            <form method="get" class="d-flex justify-content-end align-items-center">
+                <label for="role" class="form-label mb-0 me-2 text-muted">Filter Peran:</label>
+                <select id="role" name="role" class="form-select w-auto me-2">
+                    <option value="" {% if not current_role %}selected{% endif %}>Semua Peran</option>
+                    <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="staff" {% if current_role == 'staff' %}selected{% endif %}>Staff</option>
+                    <option value="pelanggan" {% if current_role == 'pelanggan' %}selected{% endif %}>Pelanggan</option>
+                </select>
+                <button type="submit" class="btn btn-outline-primary shadow-sm">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </form>
+        </div>
     </div>
 
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="alert alert-info">
-          {% for msg in messages %}
-            {{ msg }}<br>
-          {% endfor %}
-        </div>
-      {% endif %}
+        {% if messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-1"></i>
+                {% for msg in messages %}
+                    {{ msg }}<br>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
     {% endwith %}
 
-    <table class="table table-bordered table-striped align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>ID</th>
-          <th>Nama</th>
-          <th>Email</th>
-          <th>Peran</th>
-          <th>Nomor Telepon</th>
-          <th>Alamat</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in users %}
-        <tr>
-          <td>{{ u[0] }}</td>
-          <td>{{ u[1] }}</td>
-          <td>{{ u[2] }}</td>
-          <td>{{ u[3] }}</td>
-          <td>{{ u[4] or '-' }}</td>
-          <td>{{ u[5] or '-' }}</td>
-          <td>
-            <a href="{{ url_for('user_bp.users_edit', id=u[0]) }}" class="btn btn-sm btn-warning">Edit</a>
-            <a href="{{ url_for('user_bp.users_delete', id=u[0]) }}" 
-               class="btn btn-sm btn-danger"
-               onclick="return confirm('Yakin ingin menghapus pengguna ini?');">
-               Hapus
-            </a>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="7" class="text-center text-muted">Belum ada pengguna.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</body>
-</html>
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="text-center">ID</th>
+                            <th scope="col">Nama</th>
+                            <th scope="col">Email</th>
+                            <th scope="col" class="text-center">Peran</th>
+                            <th scope="col">Telepon</th>
+                            <th scope="col">Alamat</th>
+                            <th scope="col" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td class="text-center text-secondary fw-bold">{{ u[0] }}</td>
+                            <td><i class="fas fa-user me-1"></i> {{ u[1] }}</td>
+                            <td>{{ u[2] }}</td>
+                            <td class="text-center">
+                                <span class="badge 
+                                    {% if u[3] == 'admin' %}bg-danger{% elif u[3] == 'staff' %}bg-info text-dark{% else %}bg-secondary{% endif %} 
+                                    py-2 px-3 fw-normal text-capitalize">
+                                    {{ u[3] }}
+                                </span>
+                            </td>
+                            <td><i class="fas fa-phone me-1 text-muted"></i> {{ u[4] or '-' }}</td>
+                            <td>{{ u[5] or '-' }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('user_bp.users_edit', id=u[0]) }}" 
+                                   class="btn btn-sm btn-outline-warning me-2"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Pengguna">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('user_bp.users_delete', id=u[0]) }}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('⚠️ Yakin ingin menghapus pengguna {{ u[1] }}?');"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus Pengguna">
+                                    <i class="fas fa-trash-alt"></i> Hapus
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted p-4">
+                                <i class="fas fa-info-circle me-1"></i> Tidak ada pengguna yang ditemukan.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

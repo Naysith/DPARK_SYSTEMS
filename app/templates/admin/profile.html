@@ -1,0 +1,83 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Admin Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+  <h2 class="mb-4 fw-semibold">Dashboard</h2>
+
+  <form method="POST" id="profileForm">
+
+    <!-- Informasi Kontak -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-semibold mb-0">Informasi Kontak:</h5>
+          <button type="button" class="btn btn-outline-success btn-sm edit-btn" data-section="contact">
+            <i class="bi bi-pencil"></i>
+          </button>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">No HP</label>
+          <input type="text" name="nomor_telepon" class="form-control bg-light border-0 editable" 
+                 value="{{ profile[2] or '' }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Email</label>
+          <input type="text" name="email" class="form-control bg-light border-0 editable" 
+                 value="{{ profile[1] or '' }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Alamat Rumah</label>
+          <textarea name="alamat_rumah" class="form-control bg-light border-0 editable" rows="2" readonly>{{ profile[3] or '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informasi Akun -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-semibold mb-0">Informasi Akun:</h5>
+          <button type="button" class="btn btn-outline-success btn-sm edit-btn" data-section="account">
+            <i class="bi bi-pencil"></i>
+          </button>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Nama Pengguna</label>
+          <input type="text" name="nama_pengguna" class="form-control bg-light border-0 editable"
+                 value="{{ profile[0] or '' }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Password (isi jika ingin ubah)</label>
+          <input type="password" name="password" class="form-control bg-light border-0 editable" placeholder="********" readonly>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-4 d-none" id="saveBtn">💾 Simpan Perubahan</button>
+
+  </form>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<script>
+document.querySelectorAll('.edit-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const section = btn.dataset.section;
+    document.querySelectorAll('.editable').forEach(field => {
+      field.removeAttribute('readonly');
+      field.classList.remove('bg-light');
+      field.classList.add('border');
+    });
+    document.getElementById('saveBtn').classList.remove('d-none');
+  });
+});
+</script>
+{% endblock %}
