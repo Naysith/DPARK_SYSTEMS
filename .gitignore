@@ -31,3 +31,6 @@ Thumbs.db
 
 tools/
 tests/
+
+# Files
+config.py
