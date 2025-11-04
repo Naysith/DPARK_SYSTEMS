@@ -1,0 +1,198 @@
+<div id="contact-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-xl relative">
+    <div class="flex items-center gap-4 mb-6">
+      <img src="{{ url_for('static', filename='src/images/logo-brand.png') }}"
+           alt="Delis Park System Logo" class="h-16">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Delis Park System</h3>
+        <p class="text-sm text-gray-500">Jl. Kramat Raya No.98, RT.2/RW.9, DKI Jakarta 10450</p>
+      </div>
+    </div>
+
+    <button type="button" onclick="closeContactModal()"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+
+    <div id="contact-alert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold text-gray-900">Edit Informasi Kontak</h3>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">No Tel</label>
+        <input id="modal-no-tel" type="text"
+               class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+               value="{{ user[3] if user else session.get('nomor_telepon','') }}">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Email</label>
+        <input id="modal-email" type="text"
+               class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+               value="{{ user[2] if user else session.get('email','') }}">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Alamat Rumah</label>
+        <textarea id="modal-alamat-rumah" rows="4"
+                  class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]">{{ user[4] if user else session.get('alamat_rumah','') }}</textarea>
+      </div>
+
+      <div class="mt-6 flex flex-col gap-3">
+        <button id="btn-save-contact"
+                class="w-full bg-[#000264] text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+          Simpan
+        </button>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="account-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-xl relative">
+    <div class="flex items-center gap-4 mb-6">
+      <img src="{{ url_for('static', filename='src/images/logo-brand.png') }}"
+           alt="Delis Park System Logo" class="h-16">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Delis Park System</h3>
+        <p class="text-sm text-gray-500">Jl. Kramat Raya No.98, RT.2/RW.9, DKI Jakarta 10450</p>
+      </div>
+    </div>
+
+    <button type="button" onclick="closeAccountModal()"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+
+    <div id="account-alert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Nama Pengguna</label>
+        <input id="modal-nama-pengguna" type="text"
+               class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+               value="{{ user[1] if user else session.get('nama_pengguna','') }}">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Password Lama</label>
+        <input id="modal-old-password" type="password"
+               class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+               placeholder="Masukkan password lama">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Password Baru (kosong = tidak diubah)</label>
+        <input id="modal-password" type="password"
+               class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+               placeholder="Masukkan password baru">
+      </div>
+
+      <div class="mt-6 flex flex-col gap-3">
+        <button id="btn-save-account"
+                class="w-full bg-[#000264] text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+          Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const flashMessage = sessionStorage.getItem('flashMessage');
+        if (flashMessage) {
+            const alertBox = document.getElementById('global-alert');
+            if (alertBox) {
+                alertBox.textContent = flashMessage;
+                alertBox.className = 'mb-6 p-4 rounded-lg text-sm bg-green-100 text-green-700';
+                alertBox.classList.remove('hidden');
+                
+                sessionStorage.removeItem('flashMessage');
+            }
+        }
+    });
+
+    function openContactModal(){ const m=document.getElementById('contact-modal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+    function closeContactModal(){ const m=document.getElementById('contact-modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+    function openAccountModal(){ const m=document.getElementById('account-modal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+    function closeAccountModal(){ const m=document.getElementById('account-modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+
+    function showModalAlert(id, msg, cls){
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    // ...existing code...
+    document.getElementById('btn-save-contact').addEventListener('click', function(){
+    const nomor = document.getElementById('modal-no-tel').value.trim();
+    const alamat = document.getElementById('modal-alamat-rumah').value.trim();
+
+    fetch('{{ url_for("staff_bp.update_profile_contact") }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nomor_telepon: nomor, alamat_rumah: alamat })
+    })
+    .then(async res => {
+        const text = await res.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
+        if (!res.ok) {
+        const msg = (json && json.message) || `Server error ${res.status}`;
+        showModalAlert('contact-alert', msg, 'bg-red-100 text-red-700');
+        throw new Error(msg);
+        }
+        if (json && json.success) {
+        sessionStorage.setItem('flashMessage', json.message || 'Informasi kontak berhasil diperbarui.');
+        location.reload();
+        } else {
+        showModalAlert('contact-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
+        }
+    })
+    .catch(err => {
+        console.error('Fetch error:', err);
+        // jika sudah menampilkan alert di atas, jangan tampilkan lagi; kalau belum, tampilkan generik
+        if (!document.getElementById('contact-alert').textContent) {
+        showModalAlert('contact-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
+        }
+    });
+    });
+
+    document.getElementById('btn-save-account').addEventListener('click', function(){
+    const nama = document.getElementById('modal-nama-pengguna').value.trim();
+    const password = document.getElementById('modal-password').value;
+    const oldPassword = document.getElementById('modal-old-password').value; 
+
+
+    if (password && !oldPassword) {
+      showModalAlert('account-alert','Masukkan password lama untuk mengganti password','bg-red-100 text-red-700');
+      return;
+    }
+
+    fetch('{{ url_for("staff_bp.update_profile_account") }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ nama_pengguna: nama, password: password, old_password: oldPassword }) // <-- include old_password
+    })
+    .then(async res => {
+        const text = await res.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
+        if (!res.ok) {
+            const msg = (json && json.message) || `Server error ${res.status}`;
+            showModalAlert('account-alert', msg, 'bg-red-100 text-red-700');
+            throw new Error(msg);
+        }
+        if (json && json.success) {
+            sessionStorage.setItem('flashMessage', json.message || 'Informasi akun berhasil diperbarui.');
+            location.reload();
+        } else {
+            showModalAlert('account-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
+        }
+    })
+    .catch(err => {
+        console.error('Fetch error:', err);
+        if (!document.getElementById('account-alert').textContent) {
+            showModalAlert('account-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
+        }
+    });
+});
+</script>
