@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for, session
 from app import mysql
 from app.utils.helpers import login_required, role_required
 from app.utils.error_handler import handle_mysql_error
@@ -121,4 +121,88 @@ def validasi_tiket():
         flash('Terjadi kesalahan saat memproses tiket.', 'danger')
 
     return render_template('staff/validasi_tiket.html', result=result)
+@staff_bp.route('/api/staff/cek_tiket', methods=['POST'])
+@login_required
+@role_required('staff')
+def api_cek_tiket():
+    try:
+        data = request.get_json() or request.form
+        kode_tiket = data.get('kode_tiket')
+        if not kode_tiket:
+            return jsonify(success=False, message='Kode tiket harus diisi'), 400
+
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT 
+                t.id_tiket,
+                t.kode_tiket,
+                t.status_tiket,
+                s.id_sesi,
+                s.nama_sesi,
+                s.waktu_mulai,
+                s.waktu_selesai,
+                w.id_wahana,
+                w.nama_wahana
+            FROM tiket t
+            JOIN sesi s ON t.id_sesi = s.id_sesi
+            JOIN wahana w ON s.id_wahana = w.id_wahana
+            WHERE t.kode_tiket = %s
+        """, (kode_tiket,))
+        row = cur.fetchone()
+        cur.close()
+
+        if not row:
+            return jsonify(success=False, message='Kode tiket tidak ditemukan'), 404
+
+        # pack result
+        result = {
+            'id_tiket': row[0],
+            'kode_tiket': row[1],
+            'status_tiket': row[2],
+            'id_sesi': row[3],
+            'nama_sesi': row[4],
+            'waktu_mulai': row[5].isoformat() if hasattr(row[5], 'isoformat') else row[5],
+            'waktu_selesai': row[6].isoformat() if hasattr(row[6], 'isoformat') else row[6],
+            'id_wahana': row[7],
+            'nama_wahana': row[8]
+        }
+        return jsonify(success=True, data=result)
+    except Exception as e:
+        handle_mysql_error(e, 'staff_bp.api_cek_tiket')
+        return jsonify(success=False, message='Terjadi kesalahan server'), 500
+
+@staff_bp.route('/api/staff/validasi', methods=['POST'])
+@login_required
+@role_required('staff')
+def api_validasi():
+    try:
+        data = request.get_json() or request.form
+        id_tiket = data.get('id_tiket')
+        id_wahana = data.get('id_wahana')
+        id_pengguna = session.get('id_pengguna')
+
+        if not id_tiket or not id_wahana:
+            return jsonify(success=False, message='Data validasi tidak lengkap'), 400
+
+        cur = mysql.connection.cursor()
+        # update tiket
+        cur.execute("""
+            UPDATE tiket 
+            SET status_tiket = 'sudah_digunakan'
+            WHERE id_tiket = %s
+        """, (id_tiket,))
+
+        # insert log validasi
+        cur.execute("""
+            INSERT INTO validasi (id_pengguna, id_wahana)
+            VALUES (%s, %s)
+        """, (id_pengguna, id_wahana))
+
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify(success=True, message='Tiket berhasil divalidasi')
+    except Exception as e:
+        handle_mysql_error(e, 'staff_bp.api_validasi')
+        return jsonify(success=False, message='Terjadi kesalahan saat memvalidasi'), 500
 

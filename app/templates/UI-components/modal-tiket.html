@@ -1,0 +1,181 @@
+<div id="validasi-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-xl relative">
+
+        <div class="flex items-center gap-4 mb-6">
+    
+            <img src="{{ url_for('static', filename='src/images/logo-brand.png') }}"
+                alt="Delis Park System Logo" class="h-24">
+            
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Delis Park System</h3>
+                <p class="text-sm text-gray-500">Jl. Kramat Raya No.98, RT.2/RW.9, DKI Jakarta 10450</p>
+            </div>
+
+        </div>
+
+        <button type="button" onclick="closeValidasiModal()"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+
+        <h2 class="text-xl font-bold text-start text-gray-800 mb-6">Validasi Tiket Pelanggan</h2>
+
+        <div id="validasi-alert" class="hidden mb-4 p-3 rounded-lg text-sm">
+            </div>
+
+        <div id="modalStep1">
+            <div>
+                <label for="modal-kode-tiket" class="block text-sm font-medium text-gray-700 mb-1">Kode Tiket</label>
+                <input type="text" id="modal-kode-tiket"
+                    class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#000264]"
+                    placeholder="Masukkan Kode Tiket">
+            </div>
+            <button type="button" id="btn-cari-tiket"
+                class="w-full bg-[#000264] text-white py-3 rounded-lg mt-6 font-semibold hover:bg-opacity-90 transition-colors">
+                Cek Tiket
+            </button>
+        </div>
+
+        <div id="modalStep2" class="hidden">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Kode Tiket</label>
+                    <input type="text" id="res-kode"
+                        class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700 font-medium" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nama Wahana</label>
+                    <input type="text" id="res-wahana"
+                        class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal Reservasi</label>
+                    <input type="text" id="res-tanggal"
+                        class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nama Pelanggan</label>
+                    <input type="text" id="res-pelanggan"
+                        class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700" readonly>
+                </div>
+            </div>
+
+            <div id="step2-actions" class="mt-6">
+                <button type="button" id="btn-validasi"
+                    class="w-full bg-[#32D583] text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+                    Terima
+                </button>
+                
+                <button type="button" id="btn-tutup" onclick="closeValidasiModal()"
+                    class="w-full bg-gray-500 text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors hidden">
+                    Tutup (Sudah Tervalidasi)
+                </button>
+                
+                <button type="button" id="btn-kembali"
+                    class="w-full text-center text-gray-600 py-3 mt-2 hover:text-black">
+                    Kembali
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+  // helper open/close
+  function openValidasiModal() {
+    document.getElementById('validasi-modal').classList.remove('hidden');
+    document.getElementById('validasi-modal').classList.add('flex');
+    resetModal();
+    document.getElementById('modal-kode-tiket').focus();
+  }
+  function closeValidasiModal() {
+    document.getElementById('validasi-modal').classList.add('hidden');
+    document.getElementById('validasi-modal').classList.remove('flex');
+  }
+  function resetModal() {
+    document.getElementById('validasi-alert').className = 'hidden mb-3 text-sm';
+    document.getElementById('validasi-alert').textContent = '';
+    document.getElementById('modal-kode-tiket').value = '';
+    document.getElementById('tiket-result').classList.add('hidden');
+    document.getElementById('btn-validasi').classList.add('hidden');
+    // store found data on button dataset
+    const btnValidasi = document.getElementById('btn-validasi');
+    btnValidasi.dataset.idTiket = '';
+    btnValidasi.dataset.idWahana = '';
+  }
+
+  // search handler
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.id === 'btn-cari-tiket') {
+      const kode = document.getElementById('modal-kode-tiket').value.trim();
+      if (!kode) {
+        showAlert('Kode tiket harus diisi.', 'text-red-600');
+        return;
+      }
+      fetch('{{ url_for("staff_bp.api_cek_tiket") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kode_tiket: kode })
+      })
+      .then(r => r.json().then(j => ({ ok: r.ok, body: j })))
+      .then(obj => {
+        if (!obj.ok) {
+          showAlert(obj.body?.message || 'Tiket tidak ditemukan', 'text-red-600');
+          return;
+        }
+        const d = obj.body.data;
+        document.getElementById('res-wahana').textContent = d.nama_wahana;
+        document.getElementById('res-sesi').textContent = d.nama_sesi;
+        document.getElementById('res-waktu').textContent = (d.waktu_mulai || '') + ' — ' + (d.waktu_selesai || '');
+        document.getElementById('res-status').textContent = d.status_tiket;
+        document.getElementById('tiket-result').classList.remove('hidden');
+        const btnValidasi = document.getElementById('btn-validasi');
+        btnValidasi.dataset.idTiket = d.id_tiket;
+        btnValidasi.dataset.idWahana = d.id_wahana;
+        // show validasi button only if belum digunakan
+        if (d.status_tiket !== 'sudah_digunakan') {
+          btnValidasi.classList.remove('hidden');
+        } else {
+          btnValidasi.classList.add('hidden');
+          showAlert('Tiket sudah digunakan.', 'text-yellow-600');
+        }
+      })
+      .catch(err => {
+        showAlert('Terjadi kesalahan koneksi.', 'text-red-600');
+        console.error(err);
+      });
+    }
+
+    if (e.target && e.target.id === 'btn-validasi') {
+      const btn = e.target;
+      const payload = { id_tiket: btn.dataset.idTiket, id_wahana: btn.dataset.idWahana };
+      fetch('{{ url_for("staff_bp.api_validasi") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(j => {
+        if (j.success) {
+          showAlert(j.message, 'text-green-600');
+          // update status on UI
+          document.getElementById('res-status').textContent = 'sudah_digunakan';
+          btn.classList.add('hidden');
+        } else {
+          showAlert(j.message || 'Gagal memvalidasi', 'text-red-600');
+        }
+      })
+      .catch(err => {
+        showAlert('Terjadi kesalahan koneksi saat validasi.', 'text-red-600');
+        console.error(err);
+      });
+    }
+  });
+
+  function showAlert(msg, cls) {
+    const el = document.getElementById('validasi-alert');
+    el.textContent = msg;
+    el.className = cls + ' mb-3 text-sm';
+    el.classList.remove('hidden');
+  }
+</script>
