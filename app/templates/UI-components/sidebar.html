@@ -1,0 +1,160 @@
+<aside class="w-64 bg-[#F2F4F7] text-[#98A2B3] flex flex-col">
+
+    <div class="p-6">
+        <div class="h-12 w-48 flex items-center justify-center">
+            <img src="{{ url_for('static', filename = 'src/images/logo-brand.png') }}" alt="logo-brand">
+        </div>
+    </div>
+
+    <nav class="grow px-4 py-7">
+        {% set active_page = active_page|default(None) %}
+        {% set dash_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.staff_dashboard' or active_page == 'dashboard') else 'hover:text-[#00013E]' %}
+        {% set profile_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.profile' or active_page == 'profile') else 'hover:text-[#00013E]' %}
+        {% set tiket_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.validasi_tiket' or active_page == 'tiket') else 'hover:text-[#00013E]' %}
+        {% set wahana_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.wahana' or active_page == 'wahana') else 'hover:text-[#00013E]' %}
+        {% set staff_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'admin_bp.staff_management' or active_page == 'staff') else 'hover:text-[#00013E]' %}
+        <a href="{{ url_for('staff_bp.staff_dashboard') }}"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline  {{ dash_cls }}">
+            <svg fill="none" stroke="currentColor" stroke-width="2" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" class="h-6 w-6">
+                <polyline fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"
+                    points="3,17 16,4 29,17 " />
+                <polyline fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"
+                    points="6,14 6,27 13,27 13,17 19,17 19,27 26,27 
+	26,14 " />
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ profile_cls }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+        <p href="#" class="flex items-center space-x-3 px-4 py-4 rounded-md text-[#00013E] poppins-medium">
+
+            <span>Management</span>
+        </p>
+        {% if session['peran'] == 'staff' %}
+        <a href="{{ url_for('staff_bp.validasi_tiket') }}"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ tiket_cls }}">
+            <svg fill="none" stroke="currentColor" stroke-width="2" width="800px" height="800px" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
+                <path
+                    d="M9,10a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V11A1,1,0,0,0,9,10Zm12,1a1,1,0,0,0,1-1V6a1,1,0,0,0-1-1H3A1,1,0,0,0,2,6v4a1,1,0,0,0,1,1,1,1,0,0,1,0,2,1,1,0,0,0-1,1v4a1,1,0,0,0,1,1H21a1,1,0,0,0,1-1V14a1,1,0,0,0-1-1,1,1,0,0,1,0-2ZM20,9.18a3,3,0,0,0,0,5.64V17H10a1,1,0,0,0-2,0H4V14.82A3,3,0,0,0,4,9.18V7H8a1,1,0,0,0,2,0H20Z" />
+            </svg>
+            <span>Tiket</span>
+        </a>
+        {% endif %}
+        {% if session['peran'] == 'admin' %}
+        <a href="#"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ staff_cls }}">
+            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
+                <path
+                    d="M18 7.16C17.94 7.15 17.87 7.15 17.81 7.16C16.43 7.11 15.33 5.98 15.33 4.58C15.33 3.15 16.48 2 17.91 2C19.34 2 20.49 3.16 20.49 4.58C20.48 5.98 19.38 7.11 18 7.16Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path
+                    d="M16.9699 14.44C18.3399 14.67 19.8499 14.43 20.9099 13.72C22.3199 12.78 22.3199 11.24 20.9099 10.3C19.8399 9.59004 18.3099 9.35003 16.9399 9.59003"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path
+                    d="M5.96998 7.16C6.02998 7.15 6.09998 7.15 6.15998 7.16C7.53998 7.11 8.63998 5.98 8.63998 4.58C8.63998 3.15 7.48998 2 6.05998 2C4.62998 2 3.47998 3.16 3.47998 4.58C3.48998 5.98 4.58998 7.11 5.96998 7.16Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path
+                    d="M6.99994 14.44C5.62994 14.67 4.11994 14.43 3.05994 13.72C1.64994 12.78 1.64994 11.24 3.05994 10.3C4.12994 9.59004 5.65994 9.35003 7.02994 9.59003"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path
+                    d="M12 14.63C11.94 14.62 11.87 14.62 11.81 14.63C10.43 14.58 9.32996 13.45 9.32996 12.05C9.32996 10.62 10.48 9.46997 11.91 9.46997C13.34 9.46997 14.49 10.63 14.49 12.05C14.48 13.45 13.38 14.59 12 14.63Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path
+                    d="M9.08997 17.78C7.67997 18.72 7.67997 20.26 9.08997 21.2C10.69 22.27 13.31 22.27 14.91 21.2C16.32 20.26 16.32 18.72 14.91 17.78C13.32 16.72 10.69 16.72 9.08997 17.78Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Staff</span>
+        </a>
+        <a href="#"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ wahana_cls }}">
+            <svg fill="none" stroke="currentColor" stroke-width="7" version="1.1" id="Capa_1"
+                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                viewBox="0 0 481.309 481.309" style="enable-background:new 0 0 481.309 481.309;" xml:space="preserve"
+                class="h-6 w-6">
+                <g>
+                    <path d="M479.005,221.137l-15.76-29.718c2.899-1.037,4.978-3.8,4.978-7.056c0-4.142-3.357-7.5-7.5-7.5
+  c-3.318,0-6.583,0.22-9.799,0.603c-0.352,0.019-0.704,0.057-1.054,0.127c-37.897,5.009-67.762,35.845-71.237,74.198h-5.415v-91.614
+  H462.5c4.143,0,7.5-3.358,7.5-7.5V74.322c0-4.142-3.357-7.5-7.5-7.5h-20.982c-11.617-24.417-36.704-40.49-63.987-40.49
+  c-27.282,0-52.369,16.074-63.986,40.49h-14.557c-10.543-22.16-32.182-37.446-56.487-40.083v-15.78c0-4.142-3.357-7.5-7.5-7.5
+  s-7.5,3.358-7.5,7.5v15.78c-24.305,2.637-45.943,17.923-56.486,40.083h-14.557c-11.617-24.417-36.704-40.49-63.986-40.49
+  c-27.283,0-52.37,16.074-63.987,40.49H7.5c-4.143,0-7.5,3.358-7.5,7.5v78.355c0,4.142,3.357,7.5,7.5,7.5h111.887v91.614H69.499
+  h-26.87c-17.273,0-31.326,14.053-31.326,31.326v30.67c0,4.142,3.357,7.5,7.5,7.5s7.5-3.358,7.5-7.5v-30.67
+  c0-9.002,7.324-16.326,16.326-16.326h0.146c-2.917,4.757-4.602,10.348-4.602,16.326v50.041H27.759c-4.143,0-7.5,3.358-7.5,7.5
+  v45.092l-6.76,6.76c-2.929,2.929-2.929,7.678,0.001,10.606c1.464,1.465,3.384,2.197,5.303,2.197s3.839-0.732,5.304-2.197
+  l8.956-8.957c1.406-1.407,2.196-3.314,2.196-5.303v-40.698h17.783v37.591l-6.76,6.76c-2.93,2.929-2.93,7.677-0.001,10.606
+  c1.465,1.465,3.384,2.197,5.304,2.197c1.919,0,3.839-0.732,5.303-2.197l8.957-8.957c1.407-1.406,2.197-3.314,2.197-5.303v-41.629
+  c9.532-2.365,17.507-9.117,21.354-18.19h29.991v92.961H7.5c-4.143,0-7.5,3.358-7.5,7.5v40.851c0,4.142,3.357,7.5,7.5,7.5h455
+  c4.143,0,7.5-3.358,7.5-7.5v-40.851c0-4.142-3.357-7.5-7.5-7.5h-89.282v-92.961h32.074c4.821,11.372,16.119,19.12,28.854,19.12
+  h25.283v19.678l-6.761,6.76c-2.929,2.929-2.929,7.678,0,10.606c1.465,1.464,3.385,2.197,5.304,2.197s3.839-0.732,5.304-2.197
+  l8.957-8.957c1.406-1.406,2.196-3.314,2.196-5.303v-49.404c0-4.142-3.357-7.5-7.5-7.5h-17.921v-65.283
+  c0-1.045,0.076-2.08,0.191-3.108c1.938,1.574,4.177,2.78,6.636,3.535c1.908,0.585,3.859,0.876,5.801,0.876
+  c3.173,0,6.317-0.775,9.199-2.304c4.646-2.464,8.055-6.589,9.598-11.617C481.977,231.11,481.469,225.783,479.005,221.137z
+  M15,130.177h387.5c4.143,0,7.5-3.358,7.5-7.5s-3.357-7.5-7.5-7.5H15V81.822h18.414c3.099,0,5.878-1.905,6.995-4.795
+  c8.257-21.351,29.18-35.695,52.062-35.695s43.804,14.345,52.061,35.695c1.117,2.89,3.896,4.795,6.995,4.795h24.418
+  c3.099,0,5.878-1.905,6.995-4.795c8.257-21.351,29.179-35.695,52.061-35.695s43.805,14.345,52.062,35.695
+  c1.117,2.89,3.896,4.795,6.995,4.795h24.418c3.099,0,5.878-1.905,6.995-4.795c8.257-21.351,29.179-35.695,52.061-35.695
+  c22.883,0,43.805,14.345,52.062,35.695c1.117,2.89,3.896,4.795,6.995,4.795H455v33.355h-22.5c-4.143,0-7.5,3.358-7.5,7.5
+  s3.357,7.5,7.5,7.5H455v15H15V130.177z M60.542,333.158h-7.369v-50.041c0-9.002,7.324-16.326,16.326-16.326h57.378
+  c0.02,0,20.088,0,20.088,0c4.143,0,7.5-3.358,7.5-7.5c0-32.557,23.195-59.798,53.928-66.068l18.53,34.942
+  c0.587,1.106,0.708,2.375,0.341,3.572c-0.368,1.197-1.179,2.179-2.285,2.766c-2.284,1.21-5.128,0.338-6.339-1.944l-7.929-14.951
+  c-1.94-3.659-6.479-5.053-10.14-3.112c-3.659,1.94-5.053,6.48-3.112,10.14l2.441,4.603c-3.099,6.01-4.721,12.675-4.721,19.518
+  v72.783c0,4.142,3.357,7.5,7.5,7.5h17.92v4.12h-25.283c-7.548,0-14.112-5.224-15.858-12.5v-15.619c0-4.142-3.357-7.5-7.5-7.5
+  s-7.5,3.358-7.5,7.5v9H91.401v-25.499c0-4.142-3.357-7.5-7.5-7.5s-7.5,3.358-7.5,7.5v32.118
+  C74.655,327.933,68.09,333.158,60.542,333.158z M455,462.85H15v-25.851h440V462.85z M358.218,421.999H134.387v-92.961h32.075
+  c4.82,11.372,16.118,19.12,28.854,19.12h25.283v19.678l-6.76,6.76c-2.929,2.929-2.929,7.678,0.001,10.607
+  c1.464,1.464,3.384,2.196,5.303,2.196s3.839-0.732,5.304-2.197l8.956-8.957c1.406-1.407,2.196-3.314,2.196-5.303v-49.404
+  c0-4.142-3.357-7.5-7.5-7.5h-17.92v-65.283c0-1.049,0.077-2.088,0.193-3.12c3.523,2.854,7.935,4.411,12.443,4.41
+  c3.108,0,6.26-0.737,9.191-2.292c4.646-2.464,8.055-6.589,9.598-11.617c1.543-5.028,1.035-10.355-1.429-15l-15.76-29.718
+  c2.9-1.037,4.978-3.8,4.978-7.056c0-4.142-3.357-7.5-7.5-7.5c-3.318,0-6.583,0.22-9.799,0.603
+  c-0.352,0.019-0.704,0.057-1.054,0.127c-37.897,5.009-67.762,35.845-71.237,74.198h-5.416v-91.614h223.831v91.614h-49.889h-26.87
+  c-17.273,0-31.326,14.053-31.326,31.326v30.67c0,4.142,3.357,7.5,7.5,7.5s7.5-3.358,7.5-7.5v-30.67
+  c0-9.002,7.324-16.326,16.326-16.326h0.146c-2.917,4.757-4.602,10.348-4.602,16.326v50.041h-10.414c-4.143,0-7.5,3.358-7.5,7.5
+  v45.092l-6.76,6.76c-2.929,2.929-2.929,7.678,0.001,10.606c1.464,1.465,3.384,2.197,5.303,2.197s3.839-0.732,5.304-2.197
+  l8.956-8.957c1.406-1.407,2.196-3.314,2.196-5.303v-40.698h17.783v37.592l-6.76,6.76c-2.929,2.929-2.929,7.678,0.001,10.606
+  c1.464,1.465,3.384,2.197,5.303,2.197s3.839-0.732,5.304-2.197l8.956-8.957c1.406-1.407,2.196-3.314,2.196-5.303v-41.628
+  c9.533-2.365,17.508-9.117,21.354-18.19h29.991V421.999z M466.094,231.737c-0.368,1.197-1.179,2.179-2.286,2.766
+  c-1.105,0.588-2.376,0.707-3.571,0.34c-1.197-0.368-2.179-1.179-2.766-2.285l-7.93-14.951c-1.939-3.659-6.48-5.053-10.14-3.112
+  c-3.66,1.941-5.053,6.481-3.112,10.14l2.441,4.602c-3.099,6.01-4.721,12.675-4.721,19.518v72.783c0,4.142,3.357,7.5,7.5,7.5h17.921
+  v4.12h-25.283c-7.548,0-14.113-5.224-15.859-12.5v-15.619c0-4.142-3.357-7.5-7.5-7.5s-7.5,3.358-7.5,7.5v9h-73.056v-25.499
+  c0-4.142-3.357-7.5-7.5-7.5s-7.5,3.358-7.5,7.5v32.118c-1.746,7.276-8.311,12.5-15.859,12.5h-7.369v-50.041
+  c0-9.002,7.324-16.326,16.326-16.326h57.379c0.02,0,20.087,0,20.087,0c4.143,0,7.5-3.358,7.5-7.5
+  c0-32.557,23.195-59.798,53.928-66.068l18.53,34.942C466.34,229.271,466.461,230.539,466.094,231.737z" />
+                </g>
+            </svg>
+            <span>Wahana</span>
+        </a>
+        <a href="#"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ laporan_cls }}">
+            <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
+                version="1.1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2" class="h-6 w-6">
+                <rect height="12.5" width="10.5" y="1.75" x="2.75" />
+                <path d="m5.75 7.75h4.5m-4.5 3h2.5m-2.5-6h4.5" />
+            </svg>
+            <span>Laporan</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    <div class="p-6">
+        <a href="{{ url_for('auth_bp.logout') }}"
+            class="w-full flex items-center justify-center space-x-2 bg-[#00013E] hover:bg-[#030452] text-white py-2.5 px-4 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>
