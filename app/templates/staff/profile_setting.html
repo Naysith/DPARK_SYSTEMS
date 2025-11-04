@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Staff - Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
+</head>
+
+<body class="bg-white poppins-regular">
+
+    <div class="flex h-screen">
+        {% include 'UI-components/sidebar.html' %}
+        <main class="flex-1 h-screen overflow-y-auto bg-white p-10">
+
+            {% include 'UI-components/topbar.html' %}
+            <div class=" mx-auto">
+                <div id="global-alert" class="hidden mb-6 p-4 rounded-lg text-sm">
+                </div>
+
+                <form action="#" method="POST" class="space-y-10 w-6/12">
+
+                    <div class="">
+                        <div class="flex justify-between items-center mb-5">
+                            <h2 class="text-xl font-semibold text-gray-800">Informasi Kontak</h2>
+                            <button type="button" onclick="openContactModal()"
+                                class="text-green-600 bg-green-50 p-2 rounded-sm hover:bg-green-100 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.829-2.828z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label for="no_tel" class="block text-sm font-medium text-gray-600 mb-1">No
+                                    Tel</label>
+                                <input type="text" id="no_tel" name="no_tel" value="{{ user[3] if user else session.get('nomor_telepon', '') }}"
+                                    class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]"
+                                    readonly>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                                <input type="email" id="email" name="email" value="{{ user[2] if user else session.get('email', '') }}"
+                                    class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]"
+                                    readonly>
+                            </div>
+
+                            <div>
+                                <label for="alamat" class="block text-sm font-medium text-gray-600 mb-1">Alamat
+                                    Rumah</label>
+                                <textarea id="alamat" name="alamat" rows="4"
+                                    class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>{{ user[4] if user else session.get('alamat_rumah', '') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-5">
+                            <h2 class="text-xl font-semibold text-gray-800">Informasi Akun</h2>
+                            <button type="button" onclick="openAccountModal()"
+                                class="text-green-600 bg-green-50 p-2 rounded-sm hover:bg-green-100 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.829-2.828z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <label for="nama_pengguna" class="block text-sm font-medium text-gray-600 mb-1">Nama
+                                    Pengguna</label>
+                                <input type="text" id="nama_pengguna" name="nama_pengguna" value="{{ user[1] if user else session.get('nama_pengguna', '') }}"
+                                    class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]"
+                                    readonly>
+                            </div>
+
+                            <div>
+                                <label for="password"
+                                    class="block text-sm font-medium text-gray-600 mb-1">Password</label>
+                                <input type="password" id="password" name="password" value="••••••••••"
+                                    class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]"
+                                    readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+
+        {% include 'UI-components/modal-editProfile.html' %}
+
+        <button
+            class="fixed bottom-6 right-6 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-lg hover:bg-red-600">
+            ?
+        </button>
+    </div>
+</body>
+
+</html>

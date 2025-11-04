@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, render_template, request, flash, redirect,
 from app import mysql
 from app.utils.helpers import login_required, role_required
 from app.utils.error_handler import handle_mysql_error
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 staff_bp = Blueprint('staff_bp', __name__)
 
@@ -54,6 +56,26 @@ def staff_dashboard():
         validasi_hari_ini=validasi_hari_ini,
         validasi_list=validasi_list
     )
+
+@staff_bp.route('/staff/profile')
+@login_required
+@role_required('staff')
+def profile():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT id_pengguna, nama_pengguna, email, nomor_telepon, alamat_rumah
+            FROM pengguna
+            WHERE id_pengguna = %s
+        """, (session.get('id_pengguna'),))
+        user = cur.fetchone()
+        cur.close()
+    except Exception as e:
+        handle_mysql_error(e, 'staff_bp.profile')
+        flash('Gagal memuat profil.', 'danger')
+        user = None
+
+    return render_template('staff/profile_setting.html', user=user)
 
 @staff_bp.route('/staff/validasi_tiket', methods=['GET', 'POST'])
 @login_required
@@ -121,6 +143,98 @@ def validasi_tiket():
         flash('Terjadi kesalahan saat memproses tiket.', 'danger')
 
     return render_template('staff/validasi_tiket.html', result=result)
+
+# ...existing code...
+@staff_bp.route('/staff/profile/update_contact', methods=['POST'])
+@login_required
+@role_required('staff')
+def update_profile_contact():
+    try:
+        data = request.get_json() or {}
+        nomor = (data.get('nomor_telepon') or '').strip()
+        alamat = (data.get('alamat_rumah') or '').strip()
+        id_pengguna = session.get('id_pengguna')
+        if not id_pengguna:
+            return jsonify(success=False, message='User tidak terautentikasi'), 401
+
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            UPDATE pengguna SET nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s
+        """, (nomor, alamat, id_pengguna))
+        mysql.connection.commit()
+        cur.close()
+
+        session['nomor_telepon'] = nomor
+        session['alamat_rumah'] = alamat
+        return jsonify(success=True, message='Informasi kontak berhasil diperbarui',
+                       nomor_telepon=nomor, alamat_rumah=alamat)
+    except Exception as e:
+        handle_mysql_error(e, 'staff_bp.update_profile_contact')
+        return jsonify(success=False, message='Gagal menyimpan informasi kontak'), 500
+
+@staff_bp.route('/staff/profile/update_account', methods=['POST'])
+@login_required
+@role_required('staff')
+def update_profile_account():
+    try:
+        data = request.get_json() or {}
+        nama = (data.get('nama_pengguna') or '').strip()
+        password = data.get('password')  # kosong => tidak berubah
+        old_password = data.get('old_password')
+        id_pengguna = session.get('id_pengguna')
+        if not id_pengguna:
+            return jsonify(success=False, message='User tidak terautentikasi'), 401
+
+        cur = mysql.connection.cursor()
+        # ambil hash password saat ini dari kolom password_hash
+        cur.execute("SELECT password_hash FROM pengguna WHERE id_pengguna=%s", (id_pengguna,))
+        row = cur.fetchone()
+        current_pw = row[0] if row else None
+
+        # pastikan current_pw text bukan bytes
+        if isinstance(current_pw, (bytes, bytearray)):
+            try:
+                current_pw = current_pw.decode('utf-8')
+            except Exception:
+                current_pw = str(current_pw)
+
+        if password:  # user ingin mengubah password
+            if not old_password:
+                cur.close()
+                return jsonify(success=False, message='Password lama harus diisi untuk mengganti password'), 400
+
+            # current_pw harus berupa hash, cek menggunakan check_password_hash
+            pw_ok = False
+            if current_pw:
+                try:
+                    pw_ok = check_password_hash(current_pw, old_password)
+                except Exception as ex:
+                    print(f"[DEBUG] check_password_hash error: {ex}")
+                    pw_ok = False
+
+            if not pw_ok:
+                cur.close()
+                return jsonify(success=False, message='Password lama tidak cocok'), 403
+
+            pwd_hash = generate_password_hash(password)
+            # simpan ke kolom password_hash
+            cur.execute("UPDATE pengguna SET nama_pengguna=%s, password_hash=%s WHERE id_pengguna=%s",
+                        (nama, pwd_hash, id_pengguna))
+        else:
+            cur.execute("UPDATE pengguna SET nama_pengguna=%s WHERE id_pengguna=%s", (nama, id_pengguna))
+
+        mysql.connection.commit()
+        cur.close()
+
+        session['nama_pengguna'] = nama
+        return jsonify(success=True, message='Informasi akun berhasil diperbarui', nama_pengguna=nama)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        handle_mysql_error(e, 'staff_bp.update_profile_account')
+        return jsonify(success=False, message=f'Gagal menyimpan informasi akun: {str(e)}'), 500
+
+
 @staff_bp.route('/api/staff/cek_tiket', methods=['POST'])
 @login_required
 @role_required('staff')
