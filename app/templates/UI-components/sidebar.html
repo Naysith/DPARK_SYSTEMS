@@ -7,13 +7,16 @@
     </div>
 
     <nav class="grow px-4 py-7">
-        {% set active_page = active_page|default(None) %}
-        {% set dash_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.staff_dashboard' or active_page == 'dashboard') else 'hover:text-[#00013E]' %}
-        {% set profile_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.profile' or active_page == 'profile') else 'hover:text-[#00013E]' %}
-        {% set tiket_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.validasi_tiket' or active_page == 'tiket') else 'hover:text-[#00013E]' %}
-        {% set wahana_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.wahana' or active_page == 'wahana') else 'hover:text-[#00013E]' %}
-        {% set staff_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'admin_bp.staff_management' or active_page == 'staff') else 'hover:text-[#00013E]' %}
-        <a href="{{ url_for('staff_bp.staff_dashboard') }}"
+         {% set dash_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.staff_dashboard' or active_page == 'dashboard') else 'hover:text-[#00013E]' %}
+         {% set profile_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.profile' or active_page == 'profile') else 'hover:text-[#00013E]' %}
+         {% set dash_url = url_for('admin_bp.admin_dashboard') if session.get('peran') == 'admin' else url_for('staff_bp.staff_dashboard') %}
+         {% set dash_endpoint = 'admin_bp.admin_dashboard' if session.get('peran') == 'admin' else 'staff_bp.staff_dashboard' %}
+         {% set dash_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == dash_endpoint or active_page == 'dashboard') else 'hover:text-[#00013E]' %}
+         {% set profile_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint in ['staff_bp.profile','admin_bp.profile_admin'] or active_page == 'profile') else 'hover:text-[#00013E]' %}
+         {% set tiket_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.validasi_tiket' or active_page == 'tiket') else 'hover:text-[#00013E]' %}
+         {% set wahana_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.wahana' or active_page == 'wahana') else 'hover:text-[#00013E]' %}
+         {% set staff_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'admin_bp.kelola_staff' or active_page == 'staff') else 'hover:text-[#00013E]' %}
+        <a href="{{ dash_url }}"
             class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline  {{ dash_cls }}">
             <svg fill="none" stroke="currentColor" stroke-width="2" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" class="h-6 w-6">
@@ -63,7 +66,7 @@
         </a>
         {% endif %}
         {% if session['peran'] == 'admin' %}
-        <a href="#"
+        <a href="{{ url_for('admin_bp.kelola_staff')}}"
             class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ staff_cls }}">
             <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">

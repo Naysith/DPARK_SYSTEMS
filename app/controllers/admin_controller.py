@@ -202,6 +202,133 @@ def update_profile_account_admin():
     except Exception as e:
         handle_mysql_error(e, 'admin_bp.update_profile_account')
         return jsonify(success=False, message='Gagal menyimpan informasi akun'), 500
+    
+@admin_bp.route('/admin/kelola_staff')
+@login_required
+@role_required('admin')
+def kelola_staff():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT id_pengguna, nama_pengguna, email, alamat_rumah, nomor_telepon, peran FROM pengguna WHERE peran = 'staff' ORDER BY id_pengguna ASC
+        """)
+        staff_list = cur.fetchall()
+        cur.close()
+    except Exception as e:
+        return handle_mysql_error(e, 'admin_bp.kelola_staff')
+
+    return render_template('admin/kelola_staff.html', staff_list=staff_list)
+
+@admin_bp.route('/admin/kelola_staff/add', methods=['POST'])
+@login_required
+@role_required('admin')
+def kelola_staff_add():
+    try:
+        data = request.get_json() or {}
+        nama = (data.get('nama') or '').strip()
+        email = (data.get('email') or '').strip()
+        nomor = (data.get('nomor_telepon') or '').strip()
+        alamat = (data.get('alamat') or '').strip()
+        password = data.get('password') or ''
+
+        if not nama or not email or not password:
+            return jsonify(success=False, message='Nama, email dan password wajib'), 400
+
+        cur = mysql.connection.cursor()
+        # cek duplikat email
+        cur.execute("SELECT id_pengguna FROM pengguna WHERE email=%s", (email,))
+        if cur.fetchone():
+            cur.close()
+            return jsonify(success=False, message='Email sudah terdaftar'), 409
+
+        pwd_hash = generate_password_hash(password)
+        cur.execute("""
+            INSERT INTO pengguna (nama_pengguna, email, nomor_telepon, alamat_rumah, password_hash, peran)
+            VALUES (%s, %s, %s, %s, %s, 'staff')
+        """, (nama, email, nomor, alamat, pwd_hash))
+        mysql.connection.commit()
+        new_id = cur.lastrowid
+        cur.close()
+
+        return jsonify(success=True, message='Staff berhasil ditambahkan',
+                       id=new_id, nama=nama, email=email, nomor_telepon=nomor, alamat=alamat)
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.kelola_staff_add')
+        return jsonify(success=False, message='Gagal menambahkan staff'), 500
+
+@admin_bp.route('/admin/kelola_staff/update', methods=['POST'])
+@login_required
+@role_required('admin')
+def kelola_staff_update():
+    try:
+        data = request.get_json() or {}
+        id_pengguna = data.get('id')
+        nama = (data.get('nama') or '').strip()
+        email = (data.get('email') or '').strip()
+        nomor = (data.get('nomor_telepon') or '').strip()
+        alamat = (data.get('alamat') or '').strip()
+        password = data.get('password')  # optional: kalau kosong tidak diubah
+
+        if not id_pengguna or not nama or not email:
+            return jsonify(success=False, message='ID, nama dan email wajib'), 400
+
+        cur = mysql.connection.cursor()
+        # cek duplikat email (kecuali record ini)
+        cur.execute("SELECT id_pengguna FROM pengguna WHERE email=%s AND id_pengguna!=%s", (email, id_pengguna))
+        if cur.fetchone():
+            cur.close()
+            return jsonify(success=False, message='Email sudah dipakai oleh user lain'), 409
+
+        if password:
+            pwd_hash = generate_password_hash(password)
+            cur.execute("""
+                UPDATE pengguna
+                SET nama_pengguna=%s, email=%s, nomor_telepon=%s, alamat_rumah=%s, password_hash=%s
+                WHERE id_pengguna=%s
+            """, (nama, email, nomor, alamat, pwd_hash, id_pengguna))
+        else:
+            cur.execute("""
+                UPDATE pengguna
+                SET nama_pengguna=%s, email=%s, nomor_telepon=%s, alamat_rumah=%s
+                WHERE id_pengguna=%s
+            """, (nama, email, nomor, alamat, id_pengguna))
+
+        mysql.connection.commit()
+        cur.close()
+        return jsonify(success=True, message='Data staff berhasil diperbarui')
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.kelola_staff_update')
+        return jsonify(success=False, message='Gagal memperbarui data staff'), 500
+
+# tambahkan delete endpoint
+@admin_bp.route('/admin/kelola_staff/delete', methods=['POST'])
+@login_required
+@role_required('admin')
+def kelola_staff_delete():
+    try:
+        data = request.get_json() or {}
+        id_pengguna = data.get('id')
+        if not id_pengguna:
+            return jsonify(success=False, message='ID wajib'), 400
+
+        cur = mysql.connection.cursor()
+        # opsional: prevent deleting own admin (safety) atau pastikan peran staff
+        cur.execute("SELECT peran FROM pengguna WHERE id_pengguna=%s", (id_pengguna,))
+        row = cur.fetchone()
+        if not row:
+            cur.close()
+            return jsonify(success=False, message='User tidak ditemukan'), 404
+        if row[0] != 'staff':
+            cur.close()
+            return jsonify(success=False, message='Hanya akun staff yang bisa dihapus lewat halaman ini'), 403
+
+        cur.execute("DELETE FROM pengguna WHERE id_pengguna=%s", (id_pengguna,))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify(success=True, message='Staff berhasil dihapus')
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.kelola_staff_delete')
+        return jsonify(success=False, message='Gagal menghapus staff'), 500
 
 @admin_bp.route('/admin/generate_sesi', endpoint='generate_sesi_auto')
 @role_required('admin')
