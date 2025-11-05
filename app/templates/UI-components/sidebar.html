@@ -25,6 +25,7 @@
             </svg>
             <span>Dashboard</span>
         </a>
+        {% if session['peran'] == 'staff' %}
         <a href="{{ url_for('staff_bp.profile') }}"
             class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ profile_cls }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -34,6 +35,18 @@
             </svg>
             <span>Profile</span>
         </a>
+        {% endif %}
+        {% if session['peran'] == 'admin' %}
+        <a href="{{ url_for('admin_bp.profile_admin') }}"
+            class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ profile_cls }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+        {% endif %}
         <p href="#" class="flex items-center space-x-3 px-4 py-4 rounded-md text-[#00013E] poppins-medium">
 
             <span>Management</span>
