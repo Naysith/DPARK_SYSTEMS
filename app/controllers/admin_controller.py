@@ -1,10 +1,12 @@
 from datetime import date, timedelta
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 from app.utils.helpers import login_required, role_required
 from app.utils.sesi_auto import generate_auto_sesi
 from app.utils.scheduler import get_scheduler_status
 from app.utils.error_handler import handle_mysql_error
 from app import mysql
+from flask import jsonify, request
+from werkzeug.security import generate_password_hash, check_password_hash
 
 admin_bp = Blueprint('admin_bp', __name__)
 
@@ -110,7 +112,97 @@ def admin_dashboard():
         chart_max=chart_max,
         chart_ticks=chart_ticks
     )
-    
+
+@admin_bp.route('/admin/profile')
+@login_required
+@role_required('admin')
+def profile_admin():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT id_pengguna, nama_pengguna, email, nomor_telepon, alamat_rumah
+            FROM pengguna
+            WHERE id_pengguna = %s
+        """, (session.get('id_pengguna'),))
+        user = cur.fetchone()
+        cur.close()
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.profile_admin')
+        user = None
+    # reuse staff profile template so UI is identical
+    return render_template('staff/profile_setting.html', user=user)
+
+@admin_bp.route('/admin/profile/update_contact', methods=['POST'])
+@login_required
+@role_required('admin')
+def update_profile_contact_admin():
+    try:
+        data = request.get_json() or {}
+        nomor_telepon = (data.get('nomor_telepon') or '').strip()
+        alamat_rumah = (data.get('alamat_rumah') or '').strip()
+        id_pengguna = session.get('id_pengguna')
+        if not id_pengguna:
+            return jsonify(success=False, message='User tidak terautentikasi'), 401
+
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE pengguna SET nomor_telepon=%s, alamat_rumah=%s WHERE id_pengguna=%s",
+                    (nomor_telepon, alamat_rumah, id_pengguna))
+        mysql.connection.commit()
+        cur.close()
+
+        session['nomor_telepon'] = nomor_telepon
+        session['alamat_rumah'] = alamat_rumah
+        return jsonify(success=True, message='Informasi kontak berhasil disimpan',
+                       nomor_telepon=nomor_telepon, alamat_rumah=alamat_rumah)
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.update_profile_contact')
+        return jsonify(success=False, message='Gagal menyimpan informasi kontak'), 500
+
+
+@admin_bp.route('/admin/profile/update_account', methods=['POST'])
+@login_required
+@role_required('admin')
+def update_profile_account_admin():
+    try:
+        data = request.get_json() or {}
+        nama = (data.get('nama_pengguna') or '').strip()
+        password = data.get('password')
+        old_password = data.get('old_password')
+        id_pengguna = session.get('id_pengguna')
+        if not id_pengguna:
+            return jsonify(success=False, message='User tidak terautentikasi'), 401
+
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT password_hash FROM pengguna WHERE id_pengguna=%s", (id_pengguna,))
+        row = cur.fetchone()
+        current_hash = row[0] if row else None
+        if isinstance(current_hash, (bytes, bytearray)):
+            try:
+                current_hash = current_hash.decode('utf-8')
+            except:
+                current_hash = str(current_hash)
+
+        if password:
+            if not old_password:
+                cur.close()
+                return jsonify(success=False, message='Password lama harus diisi'), 400
+            if not current_hash or not check_password_hash(current_hash, old_password):
+                cur.close()
+                return jsonify(success=False, message='Password lama tidak cocok'), 403
+            new_hash = generate_password_hash(password)
+            cur.execute("UPDATE pengguna SET nama_pengguna=%s, password_hash=%s WHERE id_pengguna=%s",
+                        (nama, new_hash, id_pengguna))
+        else:
+            cur.execute("UPDATE pengguna SET nama_pengguna=%s WHERE id_pengguna=%s", (nama, id_pengguna))
+
+        mysql.connection.commit()
+        cur.close()
+        session['nama_pengguna'] = nama
+        return jsonify(success=True, message='Informasi akun berhasil disimpan', nama_pengguna=nama)
+    except Exception as e:
+        handle_mysql_error(e, 'admin_bp.update_profile_account')
+        return jsonify(success=False, message='Gagal menyimpan informasi akun'), 500
+
 @admin_bp.route('/admin/generate_sesi', endpoint='generate_sesi_auto')
 @role_required('admin')
 def generate_sesi_auto_route():

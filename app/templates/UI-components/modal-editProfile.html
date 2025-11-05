@@ -96,6 +96,8 @@
 </div>
 
 <script>
+    const updateContactUrl = "{{ url_for('admin_bp.update_profile_contact_admin') if session.get('peran') == 'admin' else url_for('staff_bp.update_profile_contact') }}";
+    const updateAccountUrl = "{{ url_for('admin_bp.update_profile_account_admin') if session.get('peran') == 'admin' else url_for('staff_bp.update_profile_account') }}";
     document.addEventListener('DOMContentLoaded', (event) => {
         const flashMessage = sessionStorage.getItem('flashMessage');
         if (flashMessage) {
@@ -123,76 +125,74 @@
 
     // ...existing code...
     document.getElementById('btn-save-contact').addEventListener('click', function(){
-    const nomor = document.getElementById('modal-no-tel').value.trim();
-    const alamat = document.getElementById('modal-alamat-rumah').value.trim();
+      const nomor = document.getElementById('modal-no-tel').value.trim();
+      const alamat = document.getElementById('modal-alamat-rumah').value.trim();
 
-    fetch('{{ url_for("staff_bp.update_profile_contact") }}', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ nomor_telepon: nomor, alamat_rumah: alamat })
-    })
-    .then(async res => {
-        const text = await res.text();
-        let json = null;
-        try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
-        if (!res.ok) {
-        const msg = (json && json.message) || `Server error ${res.status}`;
-        showModalAlert('contact-alert', msg, 'bg-red-100 text-red-700');
-        throw new Error(msg);
-        }
-        if (json && json.success) {
-        sessionStorage.setItem('flashMessage', json.message || 'Informasi kontak berhasil diperbarui.');
-        location.reload();
-        } else {
-        showModalAlert('contact-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
-        }
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-        // jika sudah menampilkan alert di atas, jangan tampilkan lagi; kalau belum, tampilkan generik
-        if (!document.getElementById('contact-alert').textContent) {
-        showModalAlert('contact-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
-        }
-    });
+      fetch(updateContactUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ nomor_telepon: nomor, alamat_rumah: alamat })
+      })
+      .then(async res => {
+          const text = await res.text();
+          let json = null;
+          try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
+          if (!res.ok) {
+              const msg = (json && json.message) || `Server error ${res.status}`;
+              showModalAlert('contact-alert', msg, 'bg-red-100 text-red-700');
+              throw new Error(msg);
+          }
+          if (json && json.success) {
+              sessionStorage.setItem('flashMessage', json.message || 'Informasi kontak berhasil diperbarui.');
+              location.reload();
+          } else {
+              showModalAlert('contact-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
+          }
+      })
+      .catch(err => {
+          console.error('Fetch error:', err);
+          if (!document.getElementById('contact-alert').textContent) {
+              showModalAlert('contact-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
+          }
+      });
     });
 
     document.getElementById('btn-save-account').addEventListener('click', function(){
-    const nama = document.getElementById('modal-nama-pengguna').value.trim();
-    const password = document.getElementById('modal-password').value;
-    const oldPassword = document.getElementById('modal-old-password').value; 
+      const nama = document.getElementById('modal-nama-pengguna').value.trim();
+      const password = document.getElementById('modal-password').value;
+      const oldPassword = document.getElementById('modal-old-password').value;
 
+      if (password && !oldPassword) {
+        showModalAlert('account-alert','Masukkan password lama untuk mengganti password','bg-red-100 text-red-700');
+        return;
+      }
 
-    if (password && !oldPassword) {
-      showModalAlert('account-alert','Masukkan password lama untuk mengganti password','bg-red-100 text-red-700');
-      return;
-    }
-
-    fetch('{{ url_for("staff_bp.update_profile_account") }}', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ nama_pengguna: nama, password: password, old_password: oldPassword }) // <-- include old_password
-    })
-    .then(async res => {
-        const text = await res.text();
-        let json = null;
-        try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
-        if (!res.ok) {
-            const msg = (json && json.message) || `Server error ${res.status}`;
-            showModalAlert('account-alert', msg, 'bg-red-100 text-red-700');
-            throw new Error(msg);
-        }
-        if (json && json.success) {
-            sessionStorage.setItem('flashMessage', json.message || 'Informasi akun berhasil diperbarui.');
-            location.reload();
-        } else {
-            showModalAlert('account-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
-        }
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-        if (!document.getElementById('account-alert').textContent) {
-            showModalAlert('account-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
-        }
+      fetch(updateAccountUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ nama_pengguna: nama, password: password, old_password: oldPassword })
+      })
+      .then(async res => {
+          const text = await res.text();
+          let json = null;
+          try { json = text ? JSON.parse(text) : null; } catch(e){ console.error('Invalid JSON response', text); }
+          if (!res.ok) {
+              const msg = (json && json.message) || `Server error ${res.status}`;
+              showModalAlert('account-alert', msg, 'bg-red-100 text-red-700');
+              throw new Error(msg);
+          }
+          if (json && json.success) {
+              sessionStorage.setItem('flashMessage', json.message || 'Informasi akun berhasil diperbarui.');
+              location.reload();
+          } else {
+              showModalAlert('account-alert', (json && json.message) || 'Gagal menyimpan', 'bg-red-100 text-red-700');
+          }
+      })
+      .catch(err => {
+          console.error('Fetch error:', err);
+          if (!document.getElementById('account-alert').textContent) {
+              showModalAlert('account-alert','Terjadi kesalahan koneksi','bg-red-100 text-red-700');
+          }
+      });
     });
-});
 </script>
