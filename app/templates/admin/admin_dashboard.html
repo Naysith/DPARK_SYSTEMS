@@ -3,89 +3,169 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
 </head>
-<body class="p-4 bg-light">
 
-  <div class="container">
-    <h1 class="mb-3">Admin Dashboard</h1>
-    <p>Welcome, <strong>{{ session['nama_pengguna'] }}</strong> ({{ session['peran'] }})</p>
 
-    <ul class="list-group mb-4">
-      <li class="list-group-item"><a href="{{ url_for('user_bp.users_list') }}">👤 Kelola Pengguna</a></li>
-      <li class="list-group-item"><a href="{{ url_for('wahana_bp.wahana_list') }}">🎢 Kelola Wahana</a></li>
-      <li class="list-group-item"><a href="{{ url_for('sesi_bp.sesi_list') }}">🕒 Kelola Sesi</a></li>
-      <li class="list-group-item"><a href="{{ url_for('reservasi_admin_bp.reservasi_admin_list') }}">📋 Kelola Reservasi</a></li>
-      <li class="list-group-item"><a href="{{ url_for('admin_bp.generate_sesi_auto') }}">⚙️ Generate Sesi Otomatis</a></li>
-      <li class="list-group-item"><a href="{{ url_for('admin_bp.validasi_admin') }}">✅ Kelola Validasi</a></li>
-    </ul>
+<body class="bg-white poppins-regular">
 
-    <hr>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        {% include 'UI-components/sidebar.html' %}
+        <!-- End Sidebar -->
 
-    <!-- Quick Stats Section -->
-    <h3 class="mt-4">📊 Statistik</h3>
-    <div class="row mt-3 mb-4">
-      <div class="col-md-4">
-        <div class="card text-center shadow-sm">
-          <div class="card-body">
-            <h6 class="text-muted">Total Validasi</h6>
-            <h2>{{ total_validasi or 0 }}</h2>
-          </div>
-        </div>
-      </div>
+        <main class="flex-1 h-screen overflow-y-auto bg-white p-10">
 
-      <div class="col-md-4">
-        <div class="card text-center shadow-sm">
-          <div class="card-body">
-            <h6 class="text-muted">Tiket Hari Ini (Selesai)</h6>
-            <h2>{{ tiket_hari_ini or 0 }}</h2>
-          </div>
-        </div>
-      </div>
+            <!-- Top bar -->
+            {% include 'UI-components/topbar.html' %}
+            <!-- End Top bar -->
 
-      <div class="col-md-4">
-        <div class="card text-center shadow-sm">
-          <div class="card-body">
-            <h6 class="text-muted">Validasi Hari Ini</h6>
-            <h2>{{ validasi_hari_ini or 0 }}</h2>
-          </div>
-        </div>
-      </div>
+            <div>
+                <div class="flex items-center">
+                    <h1 class="text-3xl font-bold text-gray-900 mt-6">Welcome, Admin</h1>
+                    <div class="flex space-x-6 ms-96">
+                        <div>
+                            <div class="text-sm text-gray-500">Tanggal</div>
+                            <div id="date-display" class="text-sm font-medium text-gray-900"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Waktu</div>
+                            <div id="time-display" class="text-sm font-medium text-gray-900"></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-500 mb-8">Jl. Kramat Raya No.98, RT.2/RW.9, Daerah Khusus Ibukota Jakarta 10450</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+                    <div class="lg:col-span-2 flex flex-col gap-6">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <div class="bg-[#00013E] rounded-xl p-6 text-white shadow-lg">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-2.378M1.222 17.622a3 3 0 005.356 2.378M17 20v2m-6-10a4 4 0 11-8 0 4 4 0 018 0zm-2 0a2 2 0 10-4 0 2 2 0 004 0zM23 20h-5v2m-6-10a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span class="font-medium">Pengunjung hari ini</span>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <div class="text-5xl font-bold">{{ tiket_hari_ini or 0 }}</div>
+                                    <div class="text-indigo-200">Pengunjung</div>
+                                </div>
+                                <div class="text-xs text-indigo-300 mt-2">Data diperoleh selama 1 hari terakhir</div>
+                            </div>
+
+                            <div class="bg-white rounded-xl p-6 shadow-lg">
+                                <div class="flex items-center gap-2 mb-4 text-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="font-medium">Kunjungan Selesai</span>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <div class="text-5xl font-bold text-gray-900">{{ total_validasi or 0 }}</div>
+                                    <div class="text-gray-500">Pengunjung</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-900">Total Pengunjung</h2>
+                                <button class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-medium hover:bg-green-600">See All</button>
+                            </div>
+                            <hr class="mb-4">
+                            
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-medium text-gray-700">Statistik Pengunjung</h3>
+                                <span class="text-xs text-gray-500">Data diperoleh selama 7 hari terakhir</span>
+                            </div>
+
+                            <div class="h-64">
+                                <div class="flex items-end h-full gap-2 md:gap-4 px-2">
+                                    <div class="flex flex-col justify-between h-full text-xs text-gray-400 pb-6" style="height: calc(100% - 1.25rem);">
+                                        {% for t in chart_ticks %}
+                                            <span>{{ t }}</span>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="flex-1 flex justify-between items-end h-full border-l border-b border-gray-200 pb-1 px-2">
+                                        {% for i in range(7) %}
+                                            {% set cnt = weekly_counts[i] %}
+                                            {% if chart_max %}
+                                                {% set height = (cnt * 100) / chart_max %}
+                                            {% else %}
+                                                {% set height = 5 %}
+                                            {% endif %}
+                                            <div class="flex flex-col items-center w-full" title="{{ weekly_labels[i] }}">
+                                                <div class="w-4/5 md:w-3/5 rounded-t-sm"style="height: {{ '%.1f' % height }}%; background-color: {{ '#312e81' if cnt == chart_max and cnt>0 else '#6366f1' }};">
+                                                </div>
+                                                <span class="text-xs text-gray-500 mt-1">{{ weekly_labels[i] }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1 flex flex-col gap-6 mt-48">
+
+                        <div class="bg-[#00013E] rounded-xl p-6 text-white shadow-lg">
+                            <div class="text-sm text-indigo-200 mb-1">Total Pendapatan Hari Ini</div>
+                            <div class="text-3xl font-bold">{{ '{:,.0f}'.format(pendapatan_hari_ini or 0) }} IDR</div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <div class="text-sm text-gray-500 mb-1">Total Pendapatan Minggu Ini</div>
+                            <div class="text-3xl font-bold text-gray-900">{{ '{:,.0f}'.format(pendapatan_minggu_ini or 0) }} IDR</div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <div class="text-sm text-gray-500 mb-1">Total Pendapatan Bulan Ini</div>
+                            <div class="text-3xl font-bold text-gray-900">{{ '{:,.0f}'.format(pendapatan_bulan_ini or 0) }} IDR</div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+        <button
+            class="fixed bottom-6 right-6 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-lg hover:bg-red-600">
+            ?
+        </button>
     </div>
-
-    <!-- Recent Validasi Table -->
-    <h4 class="mt-5">🧾 Riwayat Validasi Terbaru</h4>
-    <div class="table-responsive mt-3">
-      <table class="table table-bordered table-striped align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>Staff</th>
-            <th>Wahana</th>
-            <th>Waktu Validasi</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if validasi and validasi|length > 0 %}
-            {% for v in validasi %}
-              <tr>
-                <td>{{ v[0] }}</td>
-                <td>{{ v[1] }}</td>
-                <td>{{ v[2] }}</td>
-                <td>{{ v[3].strftime('%d %B %Y %H:%M') if v[3] else '-' }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="4" class="text-center text-muted">Belum ada aktivitas validasi.</td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-
-    <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-danger mt-4">Logout</a>
-  </div>
-
 </body>
+<script>
+    (function() {
+        const dateEl = document.getElementById('date-display');
+        const timeEl = document.getElementById('time-display');
+        if (!dateEl || !timeEl) return;
+        const pad = n => n.toString().padStart(2, '0');
+
+        function refresh() {
+            const now = new Date();
+            dateEl.textContent = new Intl.DateTimeFormat('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(now);
+            timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+        refresh();
+        // sinkron ke awal menit berikutnya, lalu update tiap 60 detik
+        const now = new Date();
+        const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+        setTimeout(function() {
+            refresh();
+            setInterval(refresh, 60000);
+        }, msToNextMinute);
+    })();
+</script>
 </html>

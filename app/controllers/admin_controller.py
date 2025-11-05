@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from flask import Blueprint, render_template
 from app.utils.helpers import login_required, role_required
 from app.utils.sesi_auto import generate_auto_sesi
@@ -14,11 +15,9 @@ def admin_dashboard():
     try:
         cur = mysql.connection.cursor()
 
-        # Total validasi (all time)
         cur.execute("SELECT COUNT(*) FROM validasi")
         total_validasi = cur.fetchone()[0]
 
-        # Tiket yang sudah dibayar hari ini
         cur.execute("""
             SELECT COUNT(*) 
             FROM reservasi 
@@ -27,7 +26,6 @@ def admin_dashboard():
         """)
         tiket_hari_ini = cur.fetchone()[0]
 
-        # Validasi hari ini
         cur.execute("""
             SELECT COUNT(*) 
             FROM validasi 
@@ -35,7 +33,50 @@ def admin_dashboard():
         """)
         validasi_hari_ini = cur.fetchone()[0]
 
-        # Log validasi (latest 10)
+        cur.execute("SELECT COALESCE(SUM(jumlah_bayar), 0) FROM pembayaran WHERE DATE(tanggal_bayar) = CURDATE()")
+        pendapatan_hari_ini = cur.fetchone()[0] or 0
+
+        cur.execute("""
+            SELECT COALESCE(SUM(jumlah_bayar), 0)
+            FROM pembayaran
+            WHERE YEARWEEK(DATE(tanggal_bayar), 1) = YEARWEEK(CURDATE(), 1)
+        """)
+        pendapatan_minggu_ini = cur.fetchone()[0] or 0
+
+        cur.execute("""
+            SELECT COALESCE(SUM(jumlah_bayar), 0)
+            FROM pembayaran
+            WHERE MONTH(tanggal_bayar) = MONTH(CURDATE()) AND YEAR(tanggal_bayar) = YEAR(CURDATE())
+        """)
+        pendapatan_bulan_ini = cur.fetchone()[0] or 0
+
+        # Statistik 7 hari terakhir
+        today = date.today()
+        start_date = today - timedelta(days=6)
+        cur.execute("""
+            SELECT DATE(tanggal_reservasi) AS d, COUNT(*) AS cnt
+            FROM reservasi
+            WHERE DATE(tanggal_reservasi) BETWEEN %s AND %s
+              AND status_pembayaran = 'selesai'
+            GROUP BY DATE(tanggal_reservasi)
+            ORDER BY DATE(tanggal_reservasi)
+        """, (start_date, today))
+        rows = cur.fetchall()
+        counts_map = {r[0]: r[1] for r in rows}
+
+        weekly_labels = []
+        weekly_counts = []
+        for i in range(7):
+            d = start_date + timedelta(days=i)
+            weekly_labels.append(d.strftime('%a'))
+            weekly_counts.append(counts_map.get(d, 0))
+
+        chart_max = max(weekly_counts) if weekly_counts else 0
+        if chart_max == 0:
+            chart_max = 5
+        chart_ticks = [chart_max, int(chart_max * 0.75), int(chart_max * 0.5), int(chart_max * 0.25), 0]
+
+        # Ambil riwayat validasi terakhir
         cur.execute("""
             SELECT 
                 v.id_validasi,
@@ -49,6 +90,7 @@ def admin_dashboard():
             LIMIT 10
         """)
         validasi = cur.fetchall()
+
         cur.close()
 
     except Exception as e:
@@ -59,7 +101,14 @@ def admin_dashboard():
         total_validasi=total_validasi,
         tiket_hari_ini=tiket_hari_ini,
         validasi_hari_ini=validasi_hari_ini,
-        validasi=validasi
+        validasi=validasi,
+        pendapatan_hari_ini=pendapatan_hari_ini,
+        pendapatan_minggu_ini=pendapatan_minggu_ini,
+        pendapatan_bulan_ini=pendapatan_bulan_ini,
+        weekly_labels=weekly_labels,
+        weekly_counts=weekly_counts,
+        chart_max=chart_max,
+        chart_ticks=chart_ticks
     )
     
 @admin_bp.route('/admin/generate_sesi', endpoint='generate_sesi_auto')
