@@ -3,44 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <title>Form Wahana</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
 </head>
-<body class="p-4">
-  <div class="container">
-    <h2>{{ 'Edit' if wahana else 'Tambah' }} Wahana</h2>
+<body class="bg-white poppins-regular">
 
-    <!-- ✅ Must include method + enctype for POST + file upload -->
-    <form method="POST" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label class="form-label">Nama Wahana</label>
-        <input type="text" name="nama_wahana" class="form-control"
-               value="{{ wahana[1] if wahana else '' }}" required>
+  <div class="flex h-screen">
+    {% include 'UI-components/sidebar.html' %}
+    <main class="flex-1 h-screen overflow-y-auto bg-white p-10">
+
+      {% include 'UI-components/topbar.html' %}
+      <div class="max-w-4xl mx-auto mt-6"> 
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+          
+          <div>
+            <label for="gambar_wahana" class="flex flex-col items-center justify-center w-full h-64 bg-gray-100 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-200 relative">
+              <div id="upload-area" class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500 {% if wahana and wahana[4] %}hidden{% endif %}">
+                <svg class="w-12 h-12 mb-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"/>
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5h.01M6 13l2.5-2.5 3 3L17 9"/>
+                </svg>
+                <p class="mb-2 text-lg">Upload Gambar Wahana Disini</p>
+              </div>
+              <img id="preview-img"
+    src="{% if wahana and wahana[4] %}{{ url_for('wahana_bp.wahana_image', id=wahana[0]) }}{% endif %}"
+    class="absolute inset-0 w-full h-full object-contain rounded-lg {% if not wahana or not wahana[4] %}hidden{% endif %}" />
+              <input id="gambar_wahana" type="file" name="gambar_wahana" class="hidden" accept="image/*">
+            </label>
+          </div>
+
+          <div>
+            <label for="nama_wahana" class="block mb-2 text-sm font-medium text-gray-700">Nama Wahana</label>
+            <input type="text" id="nama_wahana" name="nama_wahana" 
+                   class="w-full bg-gray-100 rounded-lg px-4 py-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   value="{{ wahana[1] if wahana else '' }}" required>
+          </div>
+
+          <div>
+            <label for="deskripsi" class="block mb-2 text-sm font-medium text-gray-700">Deskripsi Wahana</label>
+            <textarea id="deskripsi" name="deskripsi" 
+                      class="w-full bg-gray-100 rounded-lg px-4 py-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      rows="5" required>{{ wahana[2] if wahana else '' }}</textarea>
+          </div>
+
+          <div>
+            <label for="status_wahana" class="block mb-2 text-sm font-medium text-gray-700">Status Wahana</label>
+            <select id="status_wahana" name="status_wahana" 
+                    class="w-full bg-gray-100 rounded-lg px-4 py-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="aktif" {% if wahana and wahana[3]=='aktif' %}selected{% endif %}>Aktif</option>
+              <option value="maintenance" {% if wahana and wahana[3]=='maintenance' %}selected{% endif %}>Maintenance</option>
+            </select>
+          </div>
+
+          <div class="flex justify-center pt-4">
+            <button type="submit" class="w-full max-w-md bg-blue-950 text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-blue-900 transition duration-300">
+              {{ 'Simpan Perubahan' if wahana else 'Tambah Wahana' }}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Deskripsi</label>
-        <textarea name="deskripsi" class="form-control" rows="3" required>{{ wahana[2] if wahana else '' }}</textarea>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Status Wahana</label>
-        <select name="status_wahana" class="form-select" required>
-          <option value="aktif" {% if wahana and wahana[3]=='aktif' %}selected{% endif %}>Aktif</option>
-          <option value="maintenance" {% if wahana and wahana[3]=='maintenance' %}selected{% endif %}>Maintenance</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Gambar Wahana</label>
-        <input type="file" name="gambar_wahana" class="form-control">
-        {% if wahana and wahana[4] %}
-          <img src="{{ url_for('static', filename='uploads/' ~ wahana[4]) }}" width="120" class="mt-2">
-        {% endif %}
-      </div>
-
-      <button type="submit" class="btn btn-success">Simpan</button>
-      <a href="{{ url_for('wahana_bp.wahana_list') }}" class="btn btn-secondary">Batal</a>
-    </form>
+    </main>
   </div>
+
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('gambar_wahana');
+  const preview = document.getElementById('preview-img');
+  const uploadArea = document.getElementById('upload-area');
+
+  input.addEventListener('change', function(e) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        preview.src = ev.target.result;
+        preview.classList.remove('hidden');
+        uploadArea.classList.add('hidden');
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      preview.classList.add('hidden');
+      uploadArea.classList.remove('hidden');
+    }
+  });
+});
+</script>
 </html>
