@@ -25,8 +25,9 @@
           <h2 class="text-2xl font-semibold text-gray-900">Daftar Wahana</h2>
         </div>
 
-        <div class="mb-4 flex">
-          <a href="{{ url_for('wahana_bp.wahana_add') }}" class="inline-block ml-auto bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Wahana</a>
+        <div class="mb-4 flex justify-end">
+          <a href="#" class="me-5 bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Per 3 Bulan Sesi</a>
+          <a href="{{ url_for('wahana_bp.wahana_add') }}" class="bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Wahana</a>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
