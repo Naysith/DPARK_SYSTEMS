@@ -12,8 +12,6 @@
     --color-red-500: oklch(63.7% 0.237 25.331);
     --color-red-600: oklch(57.7% 0.245 27.325);
     --color-red-700: oklch(50.5% 0.213 27.518);
-    --color-amber-200: oklch(92.4% 0.12 95.746);
-    --color-amber-300: oklch(87.9% 0.169 91.605);
     --color-yellow-50: oklch(98.7% 0.026 102.212);
     --color-yellow-400: oklch(85.2% 0.199 91.936);
     --color-yellow-600: oklch(68.1% 0.162 75.834);
@@ -23,13 +21,15 @@
     --color-green-600: oklch(62.7% 0.194 149.214);
     --color-green-700: oklch(52.7% 0.154 150.069);
     --color-teal-400: oklch(77.7% 0.152 181.912);
+    --color-blue-100: oklch(93.2% 0.032 255.585);
     --color-blue-500: oklch(62.3% 0.214 259.815);
     --color-blue-600: oklch(54.6% 0.245 262.881);
+    --color-blue-700: oklch(48.8% 0.243 264.376);
+    --color-blue-800: oklch(42.4% 0.199 265.638);
     --color-blue-900: oklch(37.9% 0.146 265.522);
     --color-blue-950: oklch(28.2% 0.091 267.935);
     --color-indigo-200: oklch(87% 0.065 274.039);
     --color-indigo-300: oklch(78.5% 0.115 274.713);
-    --color-indigo-900: oklch(35.9% 0.144 278.697);
     --color-gray-50: oklch(98.5% 0.002 247.839);
     --color-gray-100: oklch(96.7% 0.003 264.542);
     --color-gray-200: oklch(92.8% 0.006 264.531);
@@ -279,6 +279,9 @@
   .mx-auto {
     margin-inline: auto;
   }
+  .my-auto {
+    margin-block: auto;
+  }
   .ms-2 {
     margin-inline-start: calc(var(--spacing) * 2);
   }
@@ -293,9 +296,6 @@
   }
   .me-5 {
     margin-inline-end: calc(var(--spacing) * 5);
-  }
-  .me-auto {
-    margin-inline-end: auto;
   }
   .mt-1 {
     margin-top: calc(var(--spacing) * 1);
@@ -381,9 +381,6 @@
   .h-24 {
     height: calc(var(--spacing) * 24);
   }
-  .h-48 {
-    height: calc(var(--spacing) * 48);
-  }
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
@@ -392,6 +389,9 @@
   }
   .h-screen {
     height: 100vh;
+  }
+  .max-h-56 {
+    max-height: calc(var(--spacing) * 56);
   }
   .w-4 {
     width: calc(var(--spacing) * 4);
@@ -461,6 +461,9 @@
   }
   .flex-col {
     flex-direction: column;
+  }
+  .flex-wrap {
+    flex-wrap: wrap;
   }
   .items-baseline {
     align-items: baseline;
@@ -616,9 +619,6 @@
   .border-gray-300 {
     border-color: var(--color-gray-300);
   }
-  .bg-\[\#1D4ED8\] {
-    background-color: #1D4ED8;
-  }
   .bg-\[\#00013E\] {
     background-color: #00013E;
   }
@@ -640,6 +640,9 @@
       background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
     }
   }
+  .bg-blue-100 {
+    background-color: var(--color-blue-100);
+  }
   .bg-blue-600 {
     background-color: var(--color-blue-600);
   }
@@ -657,6 +660,9 @@
   }
   .bg-gray-500 {
     background-color: var(--color-gray-500);
+  }
+  .bg-gray-600 {
+    background-color: var(--color-gray-600);
   }
   .bg-green-50 {
     background-color: var(--color-green-50);
@@ -679,6 +685,9 @@
   .bg-red-500 {
     background-color: var(--color-red-500);
   }
+  .bg-red-600 {
+    background-color: var(--color-red-600);
+  }
   .bg-teal-400 {
     background-color: var(--color-teal-400);
   }
@@ -687,9 +696,6 @@
   }
   .bg-yellow-50 {
     background-color: var(--color-yellow-50);
-  }
-  .bg-yellow-400 {
-    background-color: var(--color-yellow-400);
   }
   .object-contain {
     object-fit: contain;
@@ -708,9 +714,6 @@
   }
   .p-6 {
     padding: calc(var(--spacing) * 6);
-  }
-  .p-8 {
-    padding: calc(var(--spacing) * 8);
   }
   .p-10 {
     padding: calc(var(--spacing) * 10);
@@ -748,9 +751,6 @@
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
   }
-  .pt-2 {
-    padding-top: calc(var(--spacing) * 2);
-  }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
   }
@@ -786,10 +786,6 @@
   .text-5xl {
     font-size: var(--text-5xl);
     line-height: var(--tw-leading, var(--text-5xl--line-height));
-  }
-  .text-base {
-    font-size: var(--text-base);
-    line-height: var(--tw-leading, var(--text-base--line-height));
   }
   .text-lg {
     font-size: var(--text-lg);
@@ -828,11 +824,17 @@
   .text-\[\#000264\] {
     color: #000264;
   }
-  .text-black {
-    color: var(--color-black);
-  }
   .text-blue-600 {
     color: var(--color-blue-600);
+  }
+  .text-blue-700 {
+    color: var(--color-blue-700);
+  }
+  .text-blue-800 {
+    color: var(--color-blue-800);
+  }
+  .text-blue-900 {
+    color: var(--color-blue-900);
   }
   .text-gray-400 {
     color: var(--color-gray-400);
@@ -938,13 +940,6 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-gray-200);
-      }
-    }
-  }
-  .hover\:bg-gray-400 {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-gray-400);
       }
     }
   }

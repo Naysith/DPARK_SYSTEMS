@@ -14,6 +14,7 @@
 
       {% include 'UI-components/topbar.html' %}
       <div class="max-w-4xl mx-auto mt-6"> 
+  
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
           
           <div>
@@ -25,9 +26,7 @@
                 </svg>
                 <p class="mb-2 text-lg">Upload Gambar Wahana Disini</p>
               </div>
-              <img id="preview-img"
-    src="{% if wahana and wahana[4] %}{{ url_for('wahana_bp.wahana_image', id=wahana[0]) }}{% endif %}"
-    class="absolute inset-0 w-full h-full object-contain rounded-lg {% if not wahana or not wahana[4] %}hidden{% endif %}" />
+              <img id="preview-img" src="{% if wahana and wahana[4] %}{{ url_for('wahana_bp.wahana_image', id=wahana[0]) }}{% endif %}" class="mx-auto my-auto max-h-56 object-contain rounded-lg {% if not wahana or not wahana[4] %}hidden{% endif %}" />
               <input id="gambar_wahana" type="file" name="gambar_wahana" class="hidden" accept="image/*">
             </label>
           </div>

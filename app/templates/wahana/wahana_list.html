@@ -5,6 +5,7 @@
   <title>Daftar Wahana</title>
   <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.tailwindcss.css">
 </head>
 <body class="bg-white poppins-regular">
 
@@ -28,27 +29,42 @@
           <a href="{{ url_for('wahana_bp.wahana_add') }}" class="inline-block ml-auto bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Wahana</a>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm overflow-auto">
-          <table class="table-auto w-full border-collapse">
-            <thead class="bg-gray-100">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-6">
+              {% set category, message = messages[0] %}
+              <div class="px-4 py-3 rounded-lg font-semibold
+                {% if category == 'success' %}bg-green-100 text-green-700
+                {% elif category == 'info' %}bg-blue-100 text-blue-700
+                {% elif category == 'error' %}bg-red-100 text-red-700
+                {% else %}bg-gray-600{% endif %}">
+                {{ message }}
+              </div>
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div>
+          <table id="tableKelolaWahana">
+            <thead>
               <tr>
-                <th class="px-4 py-2 text-left">ID</th>
-                <th class="px-4 py-2 text-left">Nama Wahana</th>
-                <th class="px-4 py-2 text-left">Deskripsi</th>
-                <th class="px-4 py-2 text-left">Status</th>
-                <th class="px-4 py-2 text-left">Aksi</th>
+                <th>No</th>
+                <th>Nama Wahana</th>
+                <th>Deskripsi</th>
+                <th>Status</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {% for w in wahana %}
-              <tr class="border-t">
-                <td class="px-4 py-3">{{ w|col(0) }}</td>
-                <td class="px-4 py-3">{{ w|col(1) }}</td>
-                <td class="px-4 py-3">{{ w|col(2) }}</td>
-                <td class="px-4 py-3">{{ w|col(3) }}</td>
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ w|col(1) }}</td>
+                <td>{{ w|col(2) }}</td>
+                <td>{{ w|col(3) }}</td>
                 
-                <td class="px-4 py-3">
-                  <a href="" class="inline-block text-blue-600 bg-green-50 px-3 py-1 rounded mr-2">Lihat Sesi</a>
+                <td>
+                  <a href="{{ url_for('sesi_bp.sesi_list_by_wahana', id_wahana=w|col(0)) }}" class="inline-block text-blue-600 bg-green-50 px-3 py-1 rounded mr-2">Lihat Sesi</a>
                   <a href="{{ url_for('wahana_bp.wahana_edit', id=w|col(0)) }}" class="inline-block text-yellow-600 bg-yellow-50 px-3 py-1 rounded mr-2">Edit</a>
                   <a href="{{ url_for('wahana_bp.wahana_delete', id=w|col(0)) }}" class="inline-block text-red-600 bg-red-50 px-3 py-1 rounded"
                      onclick="return confirm('Hapus wahana ini?')">Hapus</a>
@@ -59,13 +75,17 @@
           </table>
         </div>
 
-        <div class="mt-6">
-          <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="inline-block bg-gray-300 text-gray-800 px-3 py-1 rounded">← Kembali</a>
-        </div>
       </div>
 
     </main>
   </div>
 
 </body>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.tailwindcss.com/"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.tailwindcss.js"></script>
+<script>
+    new DataTable('#tableKelolaWahana');
+</script>
 </html>
