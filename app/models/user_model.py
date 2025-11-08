@@ -25,7 +25,7 @@ def login_user(form):
             role = 'pelanggan'
         session['peran'] = role
 
-        flash('Login berhasil!', 'success')
+        flash('Login berhasil!', 'login-success')
         
         if session['peran'] == 'admin':
             return redirect(url_for('admin_bp.admin_dashboard'))

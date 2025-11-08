@@ -59,6 +59,27 @@ def get_sesi_grouped():
         grouped[wahana_name][month_key].setdefault(day_key, []).append(row)
     return grouped
 
+def get_sesi_by_wahana(id_wahana):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai
+        FROM sesi s
+        WHERE s.id_wahana = %s
+        ORDER BY s.id_sesi ASC
+    """, (id_wahana,))
+    rows = cur.fetchall()
+    cur.close()
+    result = []
+    for row in rows:
+        result.append({
+            'id_sesi': row[0],
+            'nama_sesi': row[1],
+            'kuota': row[2],
+            'harga': row[3],
+            'waktu_mulai': row[4],
+            'waktu_selesai': row[5]
+        })
+    return result
 
 def get_sesi_paginated(page=1, per_page=10, wahana_filter=None, month_filter=None):
     from app import mysql
@@ -120,7 +141,7 @@ def add_sesi(form):
         if not id_wahana or not nama_sesi or not kuota or not harga or not waktu_mulai_raw or not waktu_selesai_raw:
             flash('\u274c Semua field wajib diisi!', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         # --- Validate numeric fields ---
         try:
@@ -130,24 +151,24 @@ def add_sesi(form):
         except ValueError:
             flash('\u274c Kuota, harga, dan ID wahana harus berupa angka.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         if kuota_int <= 0:
             flash('\u274c Kuota harus lebih besar dari 0.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         if harga_int < 0:
             flash('\u274c Harga tidak boleh negatif.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         # --- Validate wahana exists ---
         cur.execute("SELECT id_wahana FROM wahana WHERE id_wahana=%s", (id_wahana_int,))
         if not cur.fetchone():
             flash('\u274c Wahana tidak ditemukan.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         # --- Validate datetime fields and ordering ---
         try:
@@ -156,12 +177,12 @@ def add_sesi(form):
         except Exception:
             flash('\u274c Format tanggal/waktu tidak valid.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         if mulai_dt >= selesai_dt:
             flash('\u274c Waktu mulai harus sebelum waktu selesai.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         waktu_mulai = parse_datetime_local(waktu_mulai_raw)
         waktu_selesai = parse_datetime_local(waktu_selesai_raw)
@@ -172,7 +193,7 @@ def add_sesi(form):
         if cur.fetchone():
             flash('\u274c Sesi sudah ada pada waktu tersebut untuk wahana ini.', 'danger')
             cur.close()
-            return redirect(url_for('sesi_bp.sesi_add'))
+            return redirect(url_for('sesi_bp.sesi_add', id_wahana=id_wahana))
 
         # --- Insert new session ---
         cur.execute("""
@@ -185,9 +206,9 @@ def add_sesi(form):
         mysql.connection.commit()
         cur.close()
         flash('Sesi berhasil ditambahkan!', 'success')
-        return redirect(url_for('sesi_bp.sesi_list'))
+        return redirect(url_for('sesi_bp.sesi_list_by_wahana', id_wahana=id_wahana))
     except Exception as e:
-        return handle_mysql_error(e, 'sesi_bp.sesi_add')
+        return handle_mysql_error(e, 'sesi_bp.sesi_list_by_wahana')
 
 def edit_sesi(id, form):
     try:
@@ -261,20 +282,27 @@ def edit_sesi(id, form):
         mysql.connection.commit()
         cur.close()
         flash('Sesi berhasil diperbarui!', 'success')
-        return redirect(url_for('sesi_bp.sesi_list'))
+        return redirect(url_for('sesi_bp.sesi_list_by_wahana', id_wahana=id_wahana))
     except Exception as e:
-        return handle_mysql_error(e, 'sesi_bp.sesi_edit')
+        return handle_mysql_error(e, ('sesi_bp.sesi_edit', {'id': id}))
 
 def delete_sesi(id):
     try:
         cur = mysql.connection.cursor()
+        cur.execute("SELECT id_wahana FROM sesi WHERE id_sesi=%s", (id,))
+        result = cur.fetchone()
+        id_wahana = result[0] if result else None
+
         cur.execute("DELETE FROM sesi WHERE id_sesi=%s", (id,))
         mysql.connection.commit()
         cur.close()
         flash('Sesi dihapus!', 'info')
-        return redirect(url_for('sesi_bp.sesi_list'))
+        if id_wahana:
+            return redirect(url_for('sesi_bp.sesi_list_by_wahana', id_wahana=id_wahana))
+        else:
+            return redirect(url_for('wahana_bp.wahana_list'))
     except Exception as e:
-        return handle_mysql_error(e, 'sesi_bp.sesi_list')
+        return handle_mysql_error(e, 'sesi_bp.sesi_list_by_wahana')
     
 
 def find_sesi_for_date_and_period(id_wahana, date_str, period):
