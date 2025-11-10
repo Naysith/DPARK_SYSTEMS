@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, request
 from app.models.user_model import login_user, register_user, logout_user
+from app.models.wahana_model import get_all_wahana
 
 auth_bp = Blueprint('auth_bp', __name__)
 
 @auth_bp.route('/')
 def home():
-    return render_template('index.html')
+    wahana = get_all_wahana()
+    return render_template('index.html', wahana=wahana)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():

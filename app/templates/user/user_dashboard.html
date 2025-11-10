@@ -1,56 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>User Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="p-4 bg-light">
-  <div class="container">
-    <h2>Selamat Datang, {{ session['nama_pengguna'] }}</h2>
-    <p>Peran: {{ session['peran'] }}</p>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DelisPark</title>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/output.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/input.css') }}">
+  <style>
+    html{
+        scroll-behavior: smooth;
+    }
+  </style>
 
-    <div class="mt-4">
-      <a href="{{ url_for('reservasi_bp.reservasi_add') }}" class="btn btn-primary">+ Buat Reservasi Baru</a>
-  <a href="{{ url_for('user_bp.user_reservasi_list') }}" class="btn btn-outline-primary ms-2">Reservasi Saya</a>
-      <a href="{{ url_for('auth_bp.logout') }}" class="btn btn-danger float-end">Logout</a>
+</head>
+<body class="bg-white poppins-regular">
+    <div id="mobileMenu" class="bg-black text-white h-screen w-full hidden fixed z-50">
+        <div class="flex justify-end p-5 text-4xl hover:cursor-pointer" onclick="closeMobileMenu()">
+            &times;
+        </div>
+        <div class="flex justify-center items-center h-4/5 text-3xl">
+            <ul>
+                <li class="mb-3"><a href="#About" class="hover:text-gray-300" onclick="closeMobileMenu()">Tentang Kami</a></li>
+                <li class="mb-3"><a href="#Menu" class="hover:text-gray-300" onclick="closeMobileMenu()">Wahana</a></li>
+                <li class="mb-3"><a href="#" class="hover:text-gray-300" onclick="closeMobileMenu()">Login</a></li>
+                <li class="mb-3"><a href="#" class="hover:text-gray-300" onclick="closeMobileMenu()">Register</a></li>
+            </ul>
+        </div>
     </div>
 
-    
+    <div id="Home" class="relative w-full h-screen bg-cover bg-center bg-gray-400" style="background-image: url('../static/src/images/hero-section.png')">
+        <div class="absolute inset-0 bg-black/50"></div>
 
-    <h4>Tiket Saya</h4>
-    {% if tiket %}
-      <table class="table table-bordered mt-2">
-        <thead>
-          <tr>
-            <th>Kode Tiket</th>
-            <th>Status Tiket</th>
-            <th>Wahana</th>
-            <th>Sesi</th>
-            <th>Status Pembayaran</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for t in tiket %}
-          <tr>
-            <td>{{ t[0] }}</td>
-            <td>{{ t[1] }}</td>
-            <td>{{ t[2] }}</td>
-            <td>{{ t[3] }}</td>
-            <td>
-              {% if t[4] == 'selesai' %}
-                <span class="badge bg-success">sudah</span>
-              {% else %}
-                <span class="badge bg-warning text-dark">belum</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Tidak ada tiket aktif.</p>
-    {% endif %}
-  </div>
+        {% include 'UI-components/navbar.html' %}
+
+        <div class="relative z-5 h-full flex justify-center items-center">
+            <div class="text-center text-white px-4">
+                <h1 class="text-4xl lg:text-5xl font-bold mb-3">DELIS PARK SYSTEM</h1>
+                <p class="text-lg lg:text-xl">
+                    Transparansi Informasi, Efisiensi Operasional, Pengalaman Wisata Lebih Baik.
+                </p>
+                </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-5">
+        
+        <section id="About" class="my-16 lg:my-24">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+                <div class="hidden lg:block h-96 rounded-lg overflow-hidden bg-gray-200">
+                   <img src="{{url_for('static', filename='src/images/rollerCoaster.png')}}" alt="Roller Coaster" class="w-full h-full object-cover">
+                </div>
+                <div class="text-center lg:text-left">
+                    <h3 class="text-3xl font-bold text-slate-800 mb-4">SELAMAT DATANG 👋</h3>
+                    <p class="text-gray-600 mb-8">
+                        Delis Park adalah sebuah sistem manajemen tiket berbasis website yang dirancang untuk mengatasi berbagai permasalahan pada sistem penjualan tiket konvensional. Kami hadir sebagai solusi atas keluhan pengunjung mengenai ketidakjelasan informasi harga tiket dan antrean panjang di loket. <br> <br>
+                        Tujuan utama kami adalah menyediakan transparansi dan kemudahan akses informasi mengenai detail wahana dan harga tiket secara online. Kami mempermudah proses reservasi dan pembayaran bagi pengunjung , sekaligus meningkatkan efisiensi operasional bagi pengelola melalui sistem manajemen dan pelaporan penjualan yang terpusat dan otomatis.
+                    </p>
+                    <a href="#Contact" class="hidden lg:inline-flex items-center font-medium text-gray-900 group">
+                        Tentang kami
+                        <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="Menu" class="my-16 lg:my-24">
+            <div class="bg-indigo-900 text-white rounded-lg p-6 lg:p-8 flex justify-between items-center mb-6 lg:mb-8">
+                <h2 class="text-3xl font-bold">Wahana</h2>
+                <a href="#" class="inline-flex items-center font-medium text-white group">
+                    <svg class="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
+                {% for w in wahana %}
+                  <div class="relative w-full h-64 lg:h-72 rounded-lg overflow-hidden group">
+                      <img src="{{ url_for('wahana_bp.wahana_image', id=w.id_wahana) }}" alt="{{ w.nama_wahana }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 bg-gray-200">
+                      <div class="absolute inset-0 bg-linear-to-t from-black/70 to-transparent"></div>
+                      <div class="absolute inset-0 p-4 lg:p-6 flex items-end justify-between">
+                          <h3 class="text-2xl font-semibold text-white">{{ w.nama_wahana }}</h3>
+                          <a href="#" class="lg:inline-flex items-center font-medium text-white/80 hover:text-white group">
+                              Reservasi
+                              <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                          </a>
+                      </div>
+                  </div>
+                  {% endfor %}
+                
+                
+            </div>
+        </section>
+
+        </div> 
+
+    <footer class="w-full bg-white border-t border-gray-200 pt-12 lg:pt-20 pb-8 px-6">
+        <div class="container mx-auto max-w-7xl">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-16 mb-12">
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Get in Touch</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300"></a>
+                        <a href="#" class="w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300"></a>
+                        <a href="#" class="w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300"></a>
+                    </div>
+                </div>
+
+                <div></div>
+
+                <div id="Contact"> <h3 class="text-xl font-semibold mb-4">Tentang kami</h3>
+                    <p class="text-gray-600">
+                        Delis Park adalah sebuah sistem manajemen tiket berbasis website yang dirancang untuk mengatasi berbagai permasalahan pada sistem penjualan tiket konvensional. Kami hadir sebagai solusi atas keluhan pengunjung mengenai ketidakjelasan informasi harga tiket dan antrean panjang di loket.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center text-gray-500 text-sm">
+                <p>DelisPark, Pengalaman Wisata Lebih Baik.</p>
+                <p>Copyright ©. All rights reserved.</p>
+            </div>
+
+        </div>
+    </footer>
+
+
 </body>
+
 </html>
