@@ -15,9 +15,11 @@ user_bp = Blueprint('user_bp', __name__)
 def user_dashboard():
     from app.models.reservasi_model import get_reservasi_by_user
     from app.models.tiket_model import get_tiket
+    from app.models.wahana_model import get_all_wahana
     reservasi = get_reservasi_by_user(session.get('id_pengguna'))
     tiket = get_tiket(session)
-    return render_template('user/user_dashboard.html', reservasi=reservasi, tiket=tiket)
+    wahana = get_all_wahana() 
+    return render_template('user/user_dashboard.html', reservasi=reservasi, tiket=tiket, wahana=wahana)
 
 
 @user_bp.route('/user/reservasi/start')
