@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard User - Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
+</head>
+<body class="bg-white poppins-regular">
+
+    
+    {% include 'UI-components/navbar.html' %}
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-44 pb-16">
+        
+        <div id="global-alert" class="hidden mb-6 p-4 rounded-lg text-sm"></div>
+
+        <div class="flex flex-col sm:flex-row justify-between sm:items-start mb-12 gap-6">
+            
+            <form action="#" method="POST" class="space-y-10 w-full max-w-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-5">
+                        <h2 class="text-xl font-semibold text-gray-800">Informasi Kontak</h2>
+                        <button type="button" onclick="openContactModal()"
+                            class="text-green-600 bg-green-50 p-2 rounded-sm hover:bg-green-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.829-2.828z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="no_tel" class="block text-sm font-medium text-gray-600 mb-1">No Tel</label>
+                            <input type="text" id="no_tel" name="no_tel" value="{{ user[3] if user else session.get('nomor_telepon', '+60125421562') }}"
+                                class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                            <input type="email" id="email" name="email" value="{{ user[2] if user else session.get('email', 'jokowidido@gmail.com') }}"
+                                class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>
+                        </div>
+                        <div>
+                            <label for="alamat" class="block text-sm font-medium text-gray-600 mb-1">Alamat Rumah</label>
+                            <textarea id="alamat" name="alamat" rows="4"
+                                class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>{{ user[4] if user else session.get('alamat_rumah', '123,Jalan Merdeka,Taman Seri Damai,47300 Petaling Jaya,Selangor, Malaysia') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-5">
+                        <h2 class="text-xl font-semibold text-gray-800">Informasi Akun</h2>
+                        <button type="button" onclick="openAccountModal()"
+                            class="text-green-600 bg-green-50 p-2 rounded-sm hover:bg-green-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.829-2.828z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="nama_pengguna" class="block text-sm font-medium text-gray-600 mb-1">Nama Pengguna</label>
+                            <input type="text" id="nama_pengguna" name="nama_pengguna" value="{{ user[1] if user else session.get('nama_pengguna', 'Joko Widido') }}"
+                                class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-600 mb-1">Password</label>
+                            <input type="password" id="password" name="password" value="••••••••••"
+                                class="w-full bg-gray-50 border-0 rounded-lg p-3 text-gray-900 focus:ring-2 focus:ring-[#000264]" readonly>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div>
+                <a href="#" class="inline-block bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors whitespace-nowrap">
+                    Keluar
+                </a>
+            </div>
+
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-6 sm:p-8 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Riwayat Pembelian</h2>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full sm:w-auto">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <input type="search" placeholder="Cari daftar disini" class="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#000264] focus:border-transparent">
+                </div>
+                <button type="button" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 w-full sm:w-auto justify-center">
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V16a1 1 0 01-1.447.894l-3-2A1 1 0 018 14.118V10.414L3.293 6.707A1 1 0 013 6V3z" />
+                    </svg>
+                    <span>Filter</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[900px] text-left">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-4 w-12">
+                                <input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]">
+                            </th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">No</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Kode Tiket</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Status Tiket</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Wahana</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Sesi</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Tanggal</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="p-4"><input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]"></td>
+                            <td class="py-4 px-4 text-sm text-gray-700">01</td>
+                            <td class="py-4 px-4 text-sm text-gray-700 font-medium">DP001</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-yellow-100 text-yellow-800 px-2.5 py-0.5 rounded-full text-xs font-medium">Belum digunakan</span>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Kora-kora</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Pagi</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">07/14/2025</td>
+                            <td class="py-4 px-4 text-sm">
+                                <button class="bg-[#000264] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90">Cetak</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4"><input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]"></td>
+                            <td class="py-4 px-4 text-sm text-gray-700">02</td>
+                            <td class="py-4 px-4 text-sm text-gray-700 font-medium">DP002</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium">Sudah digunakan</span>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Komedi Putar</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Siang</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">07/14/2025</td>
+                            <td class="py-4 px-4 text-sm">
+                                <button class="bg-[#000264] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90">Cetak</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4"><input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]"></td>
+                            <td class="py-4 px-4 text-sm text-gray-700">03</td>
+                            <td class="py-4 px-4 text-sm text-gray-700 font-medium">DP003</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium">Sudah digunakan</span>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Kora-kora</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Malem</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">07/14/2025</td>
+                            <td class="py-4 px-4 text-sm">
+                                <button class="bg-[#000264] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90">Cetak</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4"><input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]"></td>
+                            <td class="py-4 px-4 text-sm text-gray-700">04</td>
+                            <td class="py-4 px-4 text-sm text-gray-700 font-medium">DP004</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium">Sudah digunakan</span>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Komedi Putar</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Pagi</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">07/14/2025</td>
+                            <td class="py-4 px-4 text-sm">
+                                <button class="bg-[#000264] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90">Cetak</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4"><input type="checkbox" class="rounded border-gray-300 text-[#000264] focus:ring-[#000264]"></td>
+                            <td class="py-4 px-4 text-sm text-gray-700">05</td>
+                            <td class="py-4 px-4 text-sm text-gray-700 font-medium">DP005</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium">Sudah digunakan</span>
+                            </td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Kora-kora</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">Siang</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">07/14/2025</td>
+                            <td class="py-4 px-4 text-sm">
+                                <button class="bg-[#000264] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90">Cetak</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                </table>
+            </div>
+
+            <nav class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600" aria-label="Pagination">
+                <div class="mb-4 sm:mb-0 text-sm text-gray-500">
+                    </div>
+                <div class="flex items-center space-x-1">
+                    <a href="#" class="px-3 py-2 rounded-lg hover:bg-gray-200 text-gray-400">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-current="page" class="px-4 py-2 rounded-lg bg-[#000264] text-white font-medium">1</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-200">2</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-200">3</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-200">4</a>
+                    <span class="px-4 py-2">...</span>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-200">10</a>
+                    <a href="#" class="px-3 py-2 rounded-lg hover:bg-gray-200 text-gray-600">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+
+        </div>
+
+    </main>
+
+    {% include 'UI-components/modal-editProfile.html' %}
+
+</body>
+</html>
