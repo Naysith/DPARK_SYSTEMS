@@ -96,8 +96,8 @@
 </div>
 
 <script>
-    const updateContactUrl = "{{ url_for('admin_bp.update_profile_contact_admin') if session.get('peran') == 'admin' else url_for('staff_bp.update_profile_contact') }}";
-    const updateAccountUrl = "{{ url_for('admin_bp.update_profile_account_admin') if session.get('peran') == 'admin' else url_for('staff_bp.update_profile_account') }}";
+    const updateContactUrl = "{% if session.get('peran') == 'admin' %}{{ url_for('admin_bp.update_profile_contact_admin') }}{% elif session.get('peran') == 'staff' %}{{ url_for('staff_bp.update_profile_contact') }}{% else %}{{ url_for('user_bp.update_profile_contact_user') }}{% endif %}";
+    const updateAccountUrl = "{% if session.get('peran') == 'admin' %}{{ url_for('admin_bp.update_profile_account_admin') }}{% elif session.get('peran') == 'staff' %}{{ url_for('staff_bp.update_profile_account') }}{% else %}{{ url_for('user_bp.update_profile_account_user') }}{% endif %}";
     document.addEventListener('DOMContentLoaded', (event) => {
         const flashMessage = sessionStorage.getItem('flashMessage');
         if (flashMessage) {

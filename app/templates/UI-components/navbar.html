@@ -1,4 +1,4 @@
-<header class="absolute w-full z-10">
+<header class="absolute w-full z-10 bg-[#000264] bg-opacity-90 shadow">
     <div class="container mx-auto flex p-5 items-center">
         <div class="w-6/12 ps-3">
             <img src="{{url_for('static', filename='src/images/logo-brand.png')}}" alt="" class="size-28 md:size-20">
@@ -7,12 +7,12 @@
             <span class="pe-3 md:hidden hover:cursor-pointer text-white" onclick="openMobileMenu()">&#9776;</span>
             <div class="hidden md:inline-block text-white">
                 <ul class="flex items-center space-x-6">
-                    <li><a href="#About" class="hover:text-gray-200">Tentang Kami</a></li>
-                    <li><a href="#Menu" class="hover:text-gray-200">Wahana</a></li>
+                    <li><a href="{{url_for('user_bp.user_dashboard')}}#About" class="hover:text-gray-200">Tentang Kami</a></li>
+                    <li><a href="{{url_for('user_bp.user_dashboard')}}#Menu" class="hover:text-gray-200">Wahana</a></li>
                     {% if session.get('id_pengguna') %}
                         <li><a href="#" class="hover:text-gray-200">Pembayaran</a></li>
                         <li>
-                            <a href="{{ url_for('user_bp.user_dashboard') }}" class="bg-white/90 text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-white transition-colors">Profile</a>
+                            <a href="{{ url_for('user_bp.profile_user') }}" class="bg-white/90 text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-white transition-colors">Profile</a>
                         </li>
                     {% else %}
                         <li><a href="{{ url_for('auth_bp.login') }}" class="hover:text-gray-200">Login</a></li>
@@ -33,11 +33,11 @@
     </div>
     <div class="flex justify-center items-center h-4/5 text-3xl">
         <ul>
-            <li class="mb-3"><a href="#About" class="hover:text-gray-300" onclick="closeMobileMenu()">Tentang Kami</a></li>
-            <li class="mb-3"><a href="#Menu" class="hover:text-gray-300" onclick="closeMobileMenu()">Wahana</a></li>
+            <li class="mb-3"><a href="{{url_for('user_bp.user_dashboard')}}#About" class="hover:text-gray-300" onclick="closeMobileMenu()">Tentang Kami</a></li>
+            <li class="mb-3"><a href="{{url_for('user_bp.user_dashboard')}}#Menu" class="hover:text-gray-300" onclick="closeMobileMenu()">Wahana</a></li>
             {% if session.get('id_pengguna') %}
                 <li class="mb-3"><a href="#" class="hover:text-gray-300" onclick="closeMobileMenu()">Pembayaran</a></li>
-                <li class="mb-3"><a href="#" class="hover:text-gray-300" onclick="closeMobileMenu()">Profile</a></li>
+                <li class="mb-3"><a href="{{ url_for('user_bp.profile_user') }}" class="hover:text-gray-300" onclick="closeMobileMenu()">Profile</a></li>
             {% else %}
                 <li class="mb-3"><a href="{{ url_for('auth_bp.login') }}" class="hover:text-gray-300" onclick="closeMobileMenu()">Login</a></li>
                 <li class="mb-3"><a href="{{ url_for('auth_bp.register') }}" class="hover:text-gray-300" onclick="closeMobileMenu()">Register</a></li>

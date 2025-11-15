@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, jsonify, render_template, request, session
 from app.utils.helpers import login_required, role_required
 from app.models.user_model import get_users, add_user, edit_user, delete_user
 from app.utils.error_handler import handle_mysql_error
@@ -6,6 +6,9 @@ from app.models.wahana_model import get_wahana, get_all_wahana
 from app.models.reservasi_model import add_reservasi_return_id
 from datetime import datetime, timedelta
 from flask import request, redirect, url_for, session, render_template, flash
+from flask import Blueprint, render_template, request, session, jsonify
+from app.utils.helpers import login_required, role_required
+from app import mysql
 
 user_bp = Blueprint('user_bp', __name__)
 
@@ -119,6 +122,78 @@ def users_list():
     except Exception as e:
         return handle_mysql_error(e, 'user_bp.users_list')
     return render_template('users/list.html', users=users, current_role=role)
+
+@user_bp.route('/user/profile')
+@login_required
+@role_required('pelanggan')
+def profile_user():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT id_pengguna, nama_pengguna, email, nomor_telepon, alamat_rumah
+            FROM pengguna
+            WHERE id_pengguna = %s
+        """, (session.get('id_pengguna'),))
+        user = cur.fetchone()
+        cur.close()
+    except Exception as e:
+        user = None
+    return render_template('user/user_profile_setting.html', user=user)
+
+@user_bp.route('/user/profile/update_contact', methods=['POST'])
+@login_required
+@role_required('pelanggan')
+def update_profile_contact_user():
+    data = request.get_json()
+    nomor_telepon = data.get('nomor_telepon')
+    alamat_rumah = data.get('alamat_rumah')
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            UPDATE pengguna SET nomor_telepon=%s, alamat_rumah=%s
+            WHERE id_pengguna=%s
+        """, (nomor_telepon, alamat_rumah, session.get('id_pengguna')))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({'success': True, 'message': 'Informasi kontak berhasil diupdate.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Gagal update kontak.'}), 500
+
+@user_bp.route('/user/profile/update_account', methods=['POST'])
+@login_required
+@role_required('pelanggan')
+def update_profile_account_user():
+    data = request.get_json()
+    nama_pengguna = data.get('nama_pengguna')
+    password = data.get('password')
+    old_password = data.get('old_password')
+    try:
+        cur = mysql.connection.cursor()
+        # cek password lama
+        cur.execute("SELECT password_hash FROM pengguna WHERE id_pengguna=%s", (session.get('id_pengguna'),))
+        row = cur.fetchone()
+        from werkzeug.security import check_password_hash, generate_password_hash
+        current_hash = row[0] if row else None
+        if password:
+            if not row or not check_password_hash(current_hash, old_password):
+                cur.close()
+                return jsonify({'success': False, 'message': 'Password lama salah.'}), 400
+            cur.execute("""
+                UPDATE pengguna SET nama_pengguna=%s, password_hash=%s
+                WHERE id_pengguna=%s
+            """, (nama_pengguna, generate_password_hash(password), session.get('id_pengguna')))
+        else:
+            cur.execute("""
+                UPDATE pengguna SET nama_pengguna=%s
+                WHERE id_pengguna=%s
+            """, (nama_pengguna, session.get('id_pengguna')))
+        mysql.connection.commit()
+        cur.close()
+        session['nama_pengguna'] = nama_pengguna
+        return jsonify({'success': True, 'message': 'Informasi akun berhasil diupdate.'})
+    except Exception as e:
+        print("ERROR update_profile_account_user:", e)
+        return jsonify({'success': False, 'message': 'Gagal update akun.'}), 500
 
 @user_bp.route('/users/add', methods=['GET', 'POST'])
 @login_required
