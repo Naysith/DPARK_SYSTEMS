@@ -39,7 +39,7 @@ Untuk menjalankan proyek ini di mesin lokal Anda, ikuti langkah-langkah berikut:
 
 1.  **Clone repositori:**
     ```bash
-    git clone [https://github.com/Naysith/DPARK](https://github.com/Naysith/DPARK) SYSTEMS
+    git clone -b master https://github.com/Naysith/DPARK_SYSTEMS/
     cd DPARK-SYSTEMS # (atau nama folder yang sesuai)
     ```
     
