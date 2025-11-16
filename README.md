@@ -99,7 +99,7 @@ Sistem mengelola autentikasi pengguna dan sesi.
 
 * **Penyimpanan Password:** Kata sandi tidak disimpan sebagai teks biasa (plaintext). Saat registrasi, kata sandi di-hash dan di-salt (misalnya menggunakan `generate_password_hash`).
 * **Proses Login:** Selama login, kata sandi yang dikirimkan akan di-hash dan dibandingkan dengan hash yang tersimpan di database (misalnya menggunakan `check_password_hash`).
-* **Manajemen Sesi:** Setelah autentikasi berhasil, informasi penting pengguna (seperti id, nama, dan peran) disimpan ke dalam objek `session` yang disediakan oleh Flask. Proses logout akan menghapus data dari sesi (`session.clear()`)[cite: 347].
+* **Manajemen Sesi:** Setelah autentikasi berhasil, informasi penting pengguna (seperti id, nama, dan peran) disimpan ke dalam objek `session` yang disediakan oleh Flask. Proses logout akan menghapus data dari sesi (`session.clear()`).
 
 ## Alur Kerja Sistem (User Flow)
 
