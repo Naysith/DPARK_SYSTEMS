@@ -104,14 +104,18 @@ Sistem mengelola autentikasi pengguna dan sesi.
 ## Alur Kerja Sistem (User Flow)
 
 ### Alur Pelanggan
-![Flowchart Pelanggan]
+![USERFLOW](/app/static/src/images/DelisPark_Customer_FlowChart.png)
 
 ### Alur Staff
-![Flowchart Staff]
+![USERFLOW](/app/static/src/images/DelisPark_Staff_FlowChart.png)
 
 ### Alur Admin
-![Flowchart Admin]
+![USERFLOW](/app/static/src/images/DelisPark_admin_Flowchart.png)
 
 ## Entity Relationship Diagram (ERD)
 
-![Delis Park ERD]
+![ERD](/app/static/src/images/DelisPark_ERD.png)
+
+## logical Record Structure (LRS)
+
+![LRS](/app/static/src/images/DelisPark_LRS.png)
