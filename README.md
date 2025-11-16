@@ -22,7 +22,16 @@ Aplikasi ini dibangun menggunakan arsitektur **MVC (Model, View, Controller)**. 
 
 ## Project Structure (Simplified)
 
-DelisPark/ ├── app/ │ ├── controllers/ : Menangani permintaan (request) dan rute (routing). │ ├── models/ : Berisi definisi model data dan logika interaksi database. │ ├── templates/ : Berisi semua file template HTML yang ditampilkan ke pengguna. │ └── utils/ : Menyimpan fungsi-fungsi pembantu (utility/helper). ├── .gitignore : Menentukan file/folder yang diabaikan oleh Git. ├── config.py : File konfigurasi pusat (kunci rahasia, URI database). ├── init_db.py : Skrip untuk inisialisasi database dan membuat tabel. └── run.py : File eksekusi utama untuk menjalankan server aplikasi.
+* `DelisPark/`
+    * `app/`
+        * `controllers/`: Menangani permintaan (request) dan rute (routing).
+        * `models/`: Berisi definisi model data dan logika interaksi database.
+        * `templates/`: Berisi semua file template HTML yang ditampilkan ke pengguna.
+        * `utils/`: Menyimpan fungsi-fungsi pembantu (utility/helper).
+    * `.gitignore`: Menentukan file/folder yang diabaikan oleh Git.
+    * `config.py`: File konfigurasi pusat (kunci rahasia, URI database).
+    * `init_db.py`: Skrip untuk inisialisasi database dan membuat tabel.
+    * `run.py`: File eksekusi utama untuk menjalankan server aplikasi.
 
 ## Installation
 
@@ -42,9 +51,7 @@ Untuk menjalankan proyek ini di mesin lokal Anda, ikuti langkah-langkah berikut:
     
 
 3.  **Install dependensi Python (Flask):**
-    (Disarankan untuk membuat virtual environment terlebih dahulu)
     ```bash
-    # Jika file requirements.txt tersedia
     pip install -r requirements.txt
     ```
    
