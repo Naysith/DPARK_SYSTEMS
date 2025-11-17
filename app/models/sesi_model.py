@@ -291,13 +291,13 @@ def find_sesi_for_date_and_period(id_wahana, date_str, period):
     else:
         time_cond = "TIME(w.waktu_mulai) BETWEEN '17:00:00' AND '23:59:59'"
 
-    query = f"""
-        SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai, w.nama_wahana
-        FROM sesi s
-        JOIN wahana w ON s.id_wahana = w.id_wahana
-        WHERE s.id_wahana = %s AND DATE(s.waktu_mulai) = %s AND s.kuota > 0 AND {time_cond}
-        ORDER BY s.waktu_mulai LIMIT 1
+    query = """
+    SELECT s.id_sesi, s.nama_sesi, s.kuota, s.harga, s.waktu_mulai, s.waktu_selesai, w.nama_wahana
+    FROM sesi s
+    JOIN wahana w ON s.id_wahana = w.id_wahana
+    WHERE w.id_wahana = %s AND DATE(s.waktu_mulai) = %s
     """
+
     cur.execute(query, (id_wahana, date_str))
     row = cur.fetchone()
     cur.close()

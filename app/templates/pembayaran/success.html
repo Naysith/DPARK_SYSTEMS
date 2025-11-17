@@ -97,7 +97,13 @@
                 </div>
             </div>
         {% endif %}
-
+        
+        {% if qr_path %}
+            <div class="text-center mt-4">
+                <h4>Scan your ticket QR code below</h4>
+                <img src="{{ qr_path }}" alt="QR Ticket" style="width:200px;">
+            </div>
+        {% endif %}          
     </div>
 </div>
 

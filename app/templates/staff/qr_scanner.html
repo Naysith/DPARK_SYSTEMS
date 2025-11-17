@@ -1,0 +1,22 @@
+{% extends "staff/staff_base.html" %}
+{% block title %}QR Ticket Scanner{% endblock %}
+
+{% block content %}
+<div class="container mt-4 text-center">
+  <h2>Scan Tiket Pelanggan</h2>
+  <div id="reader" style="width: 350px; margin: auto;"></div>
+  <p id="result" class="mt-3"></p>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+function onScanSuccess(decodedText) {
+  fetch(`/staff/validate_qr?code=${decodedText}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('result').innerText = data.message;
+    });
+}
+new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
+</script>
+{% endblock %}

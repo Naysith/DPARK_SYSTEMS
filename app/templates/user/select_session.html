@@ -8,20 +8,25 @@
 <body class="p-4 bg-light">
   <div class="container">
     <h3>Pilih Sesi pada {{ selected_date }}</h3>
-    <form method="post" action="{{ url_for('user_bp.reservasi_confirm') }}">
+
+    <form method="post" action="{{ url_for('reservasi_bp.reservasi_select_session') }}">
+
       <input type="hidden" name="id_wahana" value="{{ id_wahana }}">
-      <input type="hidden" name="selected_date" value="{{ selected_date }}">
+      <input type="hidden" name="date" value="{{ selected_date }}">
+
       <div class="mb-3">
         <label class="form-label">Pilih Waktu</label>
-        <select name="session_label" class="form-select" required>
+        <select name="period" class="form-select" required>
           {% for s in sessions %}
-            <option value="{{ s[0] }}">{{ s[0] }} (mulai {{ s[1] }})</option>
+            <option value="{{ s[0] }}">{{ s[0]|capitalize }} (mulai {{ s[1] }})</option>
           {% endfor %}
         </select>
       </div>
+
       <button class="btn btn-success">Konfirmasi</button>
     </form>
-    <a href="{{ url_for('user_bp.reservasi_select_date', id_wahana=id_wahana) }}" class="btn btn-secondary mt-2">Kembali</a>
+
+    <a href="{{ url_for('reservasi_bp.reservasi_select_date', id_wahana=id_wahana) }}" class="btn btn-secondary mt-2">Kembali</a>
   </div>
 </body>
 </html>

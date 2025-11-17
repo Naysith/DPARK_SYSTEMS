@@ -10,7 +10,9 @@ def register_blueprints(app):
     from app.controllers.staff_controller import staff_bp
     from app.controllers.validasi_admin_controller import validasi_admin_bp
     from app.controllers.validasi_staff_controller import validasi_staff_bp
-
+    from app.controllers.staff_qr_controller import staff_qr_bp
+    
+    app.register_blueprint(staff_qr_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(sesi_bp)

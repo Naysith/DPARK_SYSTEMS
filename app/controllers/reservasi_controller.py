@@ -3,6 +3,7 @@ from app.models import reservasi_model, pembayaran_model
 from app.models import wahana_model, sesi_model
 from app.utils.helpers import login_required, role_required
 from app.utils.error_handler import handle_mysql_error
+from app.utils.qr_helper import generate_qr
 
 reservasi_bp = Blueprint('reservasi_bp', __name__)
 
@@ -70,6 +71,7 @@ def reservasi_select_session():
 @role_required('pelanggan')
 def reservasi_confirm():
     try:
+        print("DEBUG: reservasi_confirm POST =", request.form)
         id_pengguna = session.get('id_pengguna')
         id_sesi = int(request.form['id_sesi'])
         jumlah_tiket = int(request.form.get('jumlah_tiket', 1))
@@ -79,9 +81,11 @@ def reservasi_confirm():
             flash('Gagal membuat reservasi. Silakan coba lagi.', 'danger')
             return redirect(url_for('reservasi_bp.reservasi_start'))
 
+
         return redirect(url_for('reservasi_bp.pembayaran_form', id_reservasi=new_id))
     except Exception as e:
         return handle_mysql_error(e, 'user_bp.user_dashboard')
+
 
 # --- Add new reservation ---
 @reservasi_bp.route('/reservasi/add', methods=['GET', 'POST'], endpoint='reservasi_add')
@@ -218,12 +222,25 @@ def pembayaran_form(id_reservasi):
     try:
         if request.method == 'POST':
             result = pembayaran_model.add_pembayaran(id_reservasi, request.form)
-            # result: {id_pembayaran, pdf_file, pdf_filepath, email_to, nama_user}
             if not result:
                 flash('Gagal memproses pembayaran. Silakan coba lagi.', 'danger')
                 return redirect(url_for('reservasi_bp.reservasi_list'))
 
-            # Start background email send (non-blocking) if we have a filepath and recipient
+            # --- Generate QR Code after successful payment ---
+            from app.utils.qr_helper import generate_qr  # <<< or from same file if you kept it local
+
+            # if your pembayaran_model or reservasi_model provides kode_tiket, grab it:
+            kode_tiket = result.get('kode_tiket')  # <<< adjust if needed
+            if not kode_tiket:
+                reservasi = reservasi_model.get_reservasi(id_reservasi)
+                kode_tiket = reservasi.get('kode_tiket') if reservasi else None
+
+            qr_path = None
+            if kode_tiket:
+                qr_path = generate_qr(kode_tiket)  # <<< QR generated and saved under /static/qr_codes/
+            # ------------------------------------------------
+
+            # --- Background email thread setup (same as before) ---
             sending = False
             pdf_filepath = result.get('pdf_filepath')
             email_to = result.get('email_to')
@@ -232,10 +249,14 @@ def pembayaran_form(id_reservasi):
                 try:
                     import threading
                     from app.utils.send_email import send_email
-
                     def _bg_send(path, to_addr):
                         try:
-                            send_email(to=to_addr, subject='Your DelisPark Tickets', body='Thank you for your payment!', attachments=[path])
+                            send_email(
+                                to=to_addr,
+                                subject='Your DelisPark Tickets',
+                                body='Thank you for your payment!',
+                                attachments=[path]
+                            )
                             print(f"Background: email sent to {to_addr}")
                         except Exception as e:
                             print('Background email send failed:', e)
@@ -246,14 +267,20 @@ def pembayaran_form(id_reservasi):
                 except Exception as e:
                     print('Failed to start background email thread:', e)
 
-            # Render success page with e-ticket and sending indicator
-            return render_template('pembayaran/success.html', pdf_file=result.get('pdf_file'), id_pembayaran=result.get('id_pembayaran'), email_to=email_to, sending=sending)
+            # Render success page (now also send qr_path)
+            return render_template(
+                'pembayaran/success.html',
+                pdf_file=result.get('pdf_file'),
+                id_pembayaran=result.get('id_pembayaran'),
+                email_to=email_to,
+                sending=sending,
+                qr_path=qr_path  # <<< pass QR to template
+            )
 
         reservasi = reservasi_model.get_reservasi(id_reservasi)
         return render_template('pembayaran/form.html', reservasi=reservasi)
     except Exception as e:
         return handle_mysql_error(e, 'reservasi_bp.reservasi_list')
-
 
 @reservasi_bp.route('/pembayaran/send_email/<int:id_pembayaran>', methods=['POST'])
 @login_required
