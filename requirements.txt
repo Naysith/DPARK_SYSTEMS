@@ -1,16 +1,20 @@
-# Core web framework
-Flask==3.0.3
+# --- Core Web Framework ---
+Flask
 
-# MySQL database connector
-Flask-MySQLdb==2.0.0
-mysqlclient==2.2.4
+# --- Database Connection ---
+Flask-MySQLdb
+mysqlclient
 
-# Email support
-Flask-Mail==0.9.1
+# --- Email Support ---
+Flask-Mail
 
-# Core Flask dependencies
-Werkzeug==3.0.3
-itsdangerous==2.2.0
-click==8.1.7
-Jinja2==3.1.4
-MarkupSafe==2.1.5
+# --- Additional Features (Scheduler & PDF) ---
+apscheduler
+fpdf
+
+# --- Core Dependencies (Flask Internals) ---
+Werkzeug
+itsdangerous
+click
+Jinja2
+MarkupSafe
