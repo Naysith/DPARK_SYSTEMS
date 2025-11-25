@@ -1,7 +1,7 @@
 from app import mysql
 from app.utils.tiket_pdf import generate_ticket_pdf
 from app.utils.send_email import send_email
-
+from app.utils.qr_generator import generate_qr_buffer
 
 def add_pembayaran(id_reservasi, form):
     """Create a pembayaran record, update reservasi status, generate PDF tickets.
@@ -37,17 +37,28 @@ def add_pembayaran(id_reservasi, form):
         JOIN pengguna u ON r.id_pengguna = u.id_pengguna
         WHERE r.id_reservasi = %s
     """, (id_reservasi,))
-    tiket_list = cur.fetchall()
+    tiket_raw = cur.fetchall()
 
-    # --- Generate PDF (do not send yet) ---
-    email_to = None
-    nama_user = None
+        # Convert raw tuples → dicts and add QR codes
+    tiket_list = []
+    for row in tiket_raw:
+        tiket_list.append({
+            "kode_tiket": row[0],
+            "status_tiket": row[1],
+            "nama_wahana": row[2],
+            "nama_sesi": row[3],
+            "qr_buf": generate_qr_buffer(row[0]),  # ⬅️ QR HERE
+            "email": row[4],
+            "nama_user": row[5]
+        })
+
+    # --- Generate PDF ---
+    email_to = nama_user = None
     if tiket_list:
-        email_to = tiket_list[0][4]
-        nama_user = tiket_list[0][5]
+        email_to = tiket_list[0]["email"]
+        nama_user = tiket_list[0]["nama_user"]
         filepath, public_url = generate_ticket_pdf(tiket_list, id_reservasi, nama_user)
         pdf_file = public_url
-
     # --- Commit changes and close cursor ---
     mysql.connection.commit()
     cur.close()

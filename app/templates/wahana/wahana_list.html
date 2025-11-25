@@ -26,7 +26,11 @@
         </div>
 
         <div class="mb-4 flex justify-end">
-          <a href="#" class="me-5 bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Per 3 Bulan Sesi</a>
+          <form action="{{ url_for('wahana_bp.generate_auto_sesi') }}" method="POST" class="me-5">
+              <button class="bg-[#00013E] text-white px-4 py-2 rounded-md">
+                  + Tambah Per 3 Bulan Sesi
+              </button>
+          </form>
           <a href="{{ url_for('wahana_bp.wahana_add') }}" class="bg-[#00013E] text-white px-4 py-2 rounded-md">+ Tambah Wahana</a>
         </div>
 
