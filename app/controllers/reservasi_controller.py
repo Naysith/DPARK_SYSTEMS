@@ -94,6 +94,9 @@ def reservasi_add_route():
         id_wahana = request.args.get('id_wahana', type=int)
         wahana_list = wahana_model.get_all_wahana()
         now = datetime.datetime.now()
+        wahana_selected = None
+        if id_wahana:
+            wahana_selected = wahana_model.get_wahana(id_wahana)
         if request.method == 'POST':
             id_pengguna = session.get('id_pengguna')
             id_sesi = int(request.form['id_sesi'])
@@ -103,14 +106,17 @@ def reservasi_add_route():
             if not new_id:
                 flash('Gagal membuat reservasi. Silakan coba lagi.', 'danger')
                 return redirect(url_for('reservasi_bp.reservasi_add', id_wahana=id_wahana))
-            return redirect(url_for('reservasi_bp.pembayaran_form', id_reservasi=new_id))
+            return redirect(url_for('reservasi_bp.reservasi_list', id_reservasi=new_id))
         return render_template(
             'reservasi/reservasi_add.html',
             sesi_list=sesi_list,
             wahana_list=wahana_list,
             now=now,
             timedelta=datetime.timedelta,
-            id_wahana=id_wahana
+            id_wahana=id_wahana,
+            nama_wahana=wahana_selected[1] if wahana_selected else '',
+            deskripsi_wahana=wahana_selected[2] if wahana_selected else '',
+            gambar_wahana=url_for('wahana_bp.wahana_image', id=wahana_selected[0]) if wahana_selected else ''
         )
     except Exception as e:
         return handle_mysql_error(e, 'reservasi_bp.reservasi_list')
