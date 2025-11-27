@@ -13,11 +13,14 @@
   <form method="POST" id="reservasiForm">
     <div class="mb-3">
       <label class="form-label">Pilih Wahana</label>
-      <select id="wahanaSelect" class="form-select" required>
+      <select id="wahanaSelect" name="id_wahana" class="form-select" required>
         <option value="">-- Pilih Wahana --</option>
         {% if wahana_list %}
           {% for w in wahana_list %}
-            <option value="{{ w.id_wahana if w.id_wahana is defined else w[0] }}">{{ w.nama_wahana if w.nama_wahana is defined else w[1] }}</option>
+            <option value="{{ w.id_wahana if w.id_wahana is defined else w[0] }}"
+              {% if id_wahana and (w.id_wahana if w.id_wahana is defined else w[0]) == id_wahana %}selected{% endif %}>
+              {{ w.nama_wahana if w.nama_wahana is defined else w[1] }}
+            </option>
           {% endfor %}
         {% endif %}
       </select>
@@ -52,9 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const datePicker = document.getElementById("datePicker");
   const form = document.getElementById("reservasiForm");
 
-  // Load wahana: clear existing options (server-side fallback) then populate from API
+  const idWahanaFromServer = "{{ id_wahana or '' }}";
+
   try {
-    // Reset options but keep a default placeholder
     wahanaSelect.innerHTML = '';
     const defaultOpt = document.createElement('option');
     defaultOpt.value = '';
@@ -67,6 +70,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const opt = document.createElement("option");
         opt.value = w[0];
         opt.textContent = w[1];
+        // Set selected jika id_wahana sama
+        if (idWahanaFromServer && String(w[0]) === String(idWahanaFromServer)) {
+          opt.selected = true;
+        }
         wahanaSelect.appendChild(opt);
       });
     } else {
@@ -117,6 +124,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Auto load sessions if date and wahana already picked
   wahanaSelect.addEventListener("change", () => datePicker.dispatchEvent(new Event("change")));
+
+  // Trigger sesi load jika wahana sudah terpilih dari awal
+  if (idWahanaFromServer) {
+    datePicker.dispatchEvent(new Event("change"));
+  }
 });
 </script>
 </body>

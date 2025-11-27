@@ -1,4 +1,6 @@
+import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from app.controllers.sesi_controller import sesi_list
 from app.models import reservasi_model, pembayaran_model
 from app.models import wahana_model, sesi_model
 from app.utils.helpers import login_required, role_required
@@ -89,53 +91,27 @@ def reservasi_confirm():
 @role_required('pelanggan')
 def reservasi_add_route():
     try:
+        id_wahana = request.args.get('id_wahana', type=int)
+        wahana_list = wahana_model.get_all_wahana()
+        now = datetime.datetime.now()
         if request.method == 'POST':
             id_pengguna = session.get('id_pengguna')
-            # form field names: id_sesi and jumlah_tiket (client uses 'jumlah_tiket')
-            try:
-                id_sesi = int(request.form.get('id_sesi'))
-            except Exception:
-                flash('Pilih sesi terlebih dahulu.', 'warning')
-                return redirect(url_for('reservasi_bp.reservasi_add'))
-
-            # handle both 'jumlah_tiket' and older 'jumlah' names
-            jumlah_tiket_raw = request.form.get('jumlah_tiket') or request.form.get('jumlah') or '1'
-            try:
-                jumlah_tiket = int(jumlah_tiket_raw)
-            except ValueError:
-                flash('Jumlah tiket tidak valid.', 'warning')
-                return redirect(url_for('reservasi_bp.reservasi_add'))
-
-            # Pre-check sesi kuota before creating reservation
-            sesi = sesi_model.get_sesi(id_sesi)
-            if not sesi:
-                flash('Sesi tidak ditemukan.', 'danger')
-                return redirect(url_for('reservasi_bp.reservasi_add'))
-            # sesi row: id_sesi, id_wahana, nama_sesi, kuota, harga, waktu_mulai, waktu_selesai
-            kuota = sesi[3] if isinstance(sesi, (list, tuple)) and len(sesi) > 3 else (sesi.get('kuota') if isinstance(sesi, dict) else None)
-            try:
-                kuota_int = int(kuota)
-            except Exception:
-                kuota_int = 0
-
-            if jumlah_tiket > kuota_int:
-                flash(f'Kuota tidak mencukupi (tersisa: {kuota_int}). Silakan pilih jumlah lebih kecil atau sesi lain.', 'warning')
-                return redirect(url_for('reservasi_bp.reservasi_add'))
-
-            # All good — create reservation and redirect to payment
+            id_sesi = int(request.form['id_sesi'])
+            jumlah_tiket = int(request.form['jumlah_tiket'])
+            # Proses insert reservasi
             new_id = reservasi_model.add_reservasi_return_id(id_pengguna, id_sesi, jumlah_tiket)
             if not new_id:
                 flash('Gagal membuat reservasi. Silakan coba lagi.', 'danger')
-                return redirect(url_for('reservasi_bp.reservasi_add'))
+                return redirect(url_for('reservasi_bp.reservasi_add', id_wahana=id_wahana))
             return redirect(url_for('reservasi_bp.pembayaran_form', id_reservasi=new_id))
-
-        # show available sessions using sesi_model and provide server-side wahana list as fallback
-        from datetime import datetime, timedelta
-        sesi_list = sesi_model.get_sesi(available_only=True)
-        # server-side wahana list for non-JS fallback
-        wahana_list = wahana_model.get_all_wahana()
-        now = datetime.now()
-        return render_template('reservasi/reservasi_add.html', sesi_list=sesi_list, wahana_list=wahana_list, now=now, timedelta=timedelta)
+        return render_template(
+            'reservasi/reservasi_add.html',
+            sesi_list=sesi_list,
+            wahana_list=wahana_list,
+            now=now,
+            timedelta=datetime.timedelta,
+            id_wahana=id_wahana
+        )
     except Exception as e:
         return handle_mysql_error(e, 'reservasi_bp.reservasi_list')
 
