@@ -34,9 +34,12 @@
           <thead class="bg-gray-50 text-gray-700 border-b border-gray-200">
             <tr>
               <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">No</th>
-              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Total Harga</th>
-              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Nama Wahana</th>
               <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Tanggal</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Sesi</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Jam</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Total Tiket</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Total Harga</th>
               <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
@@ -44,27 +47,30 @@
             {% for r in reservasi or [] %}
             <tr class="hover:bg-gray-50 transition-colors">
               <td class="py-3 px-4 text-sm text-gray-600">{{ loop.index }}</td>
-              <td class="py-3 px-4 text-sm font-medium text-gray-900">
-                Rp {{ "{:,.0f}".format(r | col('total_harga')) }}
+              <td class="py-3 px-4 text-sm font-medium text-gray-900">{{ r.nama_wahana }}</td>
+              <td class="py-3 px-4 text-sm text-gray-600">
+                {{ r.waktu_mulai.strftime("%Y-%m-%d") if r.waktu_mulai else '-' }}
               </td>
-              <td class="py-3 px-4">
-                {% if r | col('status_pembayaran') == 'menunggu' %}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    Menunggu
-                  </span>
+              <td class="py-3 px-4 text-sm text-gray-600">
+                {{ r.nama_sesi if r.nama_sesi is defined else '-' }}
+              </td>
+              <td class="py-3 px-4 text-sm text-gray-600">
+                {% if r.waktu_mulai and r.waktu_selesai %}
+                  {{ r.waktu_mulai.strftime("%H:%M") }} - {{ r.waktu_selesai.strftime("%H:%M") }}
                 {% else %}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Lunas
-                  </span>
+                  -
                 {% endif %}
               </td>
               <td class="py-3 px-4 text-sm text-gray-600">
-                {{ (r | col('tanggal_reservasi')).strftime("%Y-%m-%d %H:%M") }}
+                {{ r.kuota if r.kuota is defined else '-' }}
+              </td>
+              <td class="py-3 px-4 text-sm font-medium text-gray-900">
+                Rp {{ "{:,.0f}".format(r.total_harga) }}
               </td>
               <td class="py-3 px-4">
-                {% if r | col('status_pembayaran') == 'menunggu' %}
-                  <a href="{{ url_for('reservasi_bp.pembayaran_form', id_reservasi=r | col('id_reservasi')) }}" 
-                     class="inline-block text-white bg-[#00013E] hover:bg-[#181966] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 transition-all">
+                {% if r.status_pembayaran == 'menunggu' %}
+                  <a href="{{ url_for('reservasi_bp.pembayaran_form', id_reservasi=r.id_reservasi) }}" 
+                    class="inline-block text-white bg-[#00013E] hover:bg-[#181966] focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 transition-all">
                     Bayar
                   </a>
                 {% else %}

@@ -17,6 +17,7 @@ def get_reservasi_by_user(id_pengguna):
         SELECT 
             r.*, 
             w.nama_wahana, 
+            s.nama_sesi,
             s.waktu_mulai, 
             s.waktu_selesai, 
             s.kuota

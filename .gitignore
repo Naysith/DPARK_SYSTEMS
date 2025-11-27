@@ -34,3 +34,6 @@ tests/
 
 # Files
 config.py
+
+# Node modules
+node_modules/
