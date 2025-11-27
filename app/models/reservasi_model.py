@@ -21,17 +21,16 @@ def get_reservasi_by_user(id_pengguna):
             s.waktu_selesai, 
             s.kuota
         FROM reservasi r
-        -- join via tiket since reservasi doesn't store id_sesi directly
         JOIN tiket t ON t.id_reservasi = r.id_reservasi
         JOIN sesi s ON t.id_sesi = s.id_sesi
         JOIN wahana w ON s.id_wahana = w.id_wahana
         WHERE r.id_pengguna = %s
-        ORDER BY r.id_reservasi DESC
+        GROUP BY r.id_reservasi
+        ORDER BY r.id_reservasi ASC
     """
     cur.execute(query, (id_pengguna,))
     data = dictfetchall(cur)
     cur.close()
-    # Always return a list (empty if no rows) to make templates safe.
     return data or []
 
 

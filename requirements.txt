@@ -18,3 +18,5 @@ itsdangerous
 click
 Jinja2
 MarkupSafe
+reportslab
+qrcode
