@@ -2,63 +2,113 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buat Reservasi</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/output.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/input.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body class="p-4 bg-light">
-<div class="container">
-  <h2>Buat Reservasi</h2>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
 
-  <form method="POST" id="reservasiForm">
-    <div class="mb-3">
-      <label class="form-label">Pilih Wahana</label>
-      <select id="wahanaSelect" name="id_wahana" class="form-select" required>
-        <option value="">-- Pilih Wahana --</option>
-        {% if wahana_list %}
-          {% for w in wahana_list %}
-            <option value="{{ w.id_wahana if w.id_wahana is defined else w[0] }}"
-              {% if id_wahana and (w.id_wahana if w.id_wahana is defined else w[0]) == id_wahana %}selected{% endif %}>
-              {{ w.nama_wahana if w.nama_wahana is defined else w[1] }}
-            </option>
-          {% endfor %}
-        {% endif %}
-      </select>
+  <div class="w-full bg-white shadow-sm z-50">
+      {% include 'UI-components/navbar.html' %}
+  </div>
+
+  <div class="grow flex items-center justify-center mt-48 md:mt-40 p-4 sm:p-6 lg:p-8">
+    
+    <div class="bg-white w-full max-w-6xl rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+      
+      <div class="relative h-64 lg:h-full w-full bg-gray-200">
+        <img id="wahanaImage" 
+             src="{{ gambar_wahana }}" 
+             alt="Gambar Wahana {{ nama_wahana }}"
+             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+        <div class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent lg:hidden"></div>
+      </div>
+
+      <div class="p-8 md:p-10 lg:p-12 flex flex-col justify-center">
+        
+        <div class="mb-8">
+          <h1 id="wahanaTitle" class="text-3xl font-bold text-[#0B0B3B] mb-3">
+            {{ nama_wahana }}
+          </h1>
+          <p class="text-gray-500 text-sm leading-relaxed text-justify border-l-4 border-[#0B0B3B] pl-4">
+            {{ deskripsi_wahana }}
+          </p>
+        </div>
+
+        <form method="POST" id="reservasiForm" class="space-y-5">
+          
+          <div class="space-y-1.5">
+            <label class="hidden text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Pilih Wahana</label>
+            <div class="relative">
+                <select id="wahanaSelect" name="id_wahana" class="hidden w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg p-3.5 focus:ring-2 focus:ring-[#0B0B3B] focus:border-[#0B0B3B] focus:outline-none appearance-none cursor-pointer transition-all" required>
+                    <option value="">-- Pilih Wahana --</option>
+                    {% if wahana_list %}
+                      {% for w in wahana_list %}
+                        <option value="{{ w.id_wahana if w.id_wahana is defined else w[0] }}"
+                          {% if id_wahana and (w.id_wahana if w.id_wahana is defined else w[0]) == id_wahana %}selected{% endif %}>
+                          {{ w.nama_wahana if w.nama_wahana is defined else w[1] }}
+                        </option>
+                      {% endfor %}
+                    {% endif %}
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Pilih Tanggal</label>
+            <input type="date" id="datePicker" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg p-3.5 focus:ring-2 focus:ring-[#0B0B3B] focus:border-[#0B0B3B] focus:outline-none transition-all" required
+                   min="{{ (now).strftime('%Y-%m-%d') }}" 
+                   max="{{ (now + timedelta(days=90)).strftime('%Y-%m-%d') }}">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Pilih Sesi</label>
+            <div class="relative">
+                <select id="sesiSelect" name="id_sesi" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg p-3.5 focus:ring-2 focus:ring-[#0B0B3B] focus:border-[#0B0B3B] focus:outline-none appearance-none cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 transition-all" required>
+                    <option value="">Pilih tanggal & wahana dulu</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+             <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Jumlah Tiket</label>
+             <input type="number" name="jumlah_tiket" placeholder="1" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg p-3.5 focus:ring-2 focus:ring-[#0B0B3B] focus:border-[#0B0B3B] focus:outline-none transition-all" min="1" required>
+          </div>
+
+          <div class="pt-6 flex flex-col gap-3">
+            <button type="submit" class="w-full bg-[#0B0B3B] hover:bg-[#151560] text-white font-bold py-4 rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95">
+              Konfirmasi Reservasi
+            </button>
+            <a href="{{ url_for('user_bp.user_dashboard') }}" class="w-full text-center text-gray-500 hover:text-[#0B0B3B] text-sm font-semibold py-2 transition-colors">
+              Batalkan
+            </a>
+          </div>
+
+        </form>
+      </div>
     </div>
-
-    <div class="mb-3">
-      <label class="form-label">Pilih Tanggal</label>
-      <input type="date" id="datePicker" class="form-control" required
-             min="{{ (now).strftime('%Y-%m-%d') }}" 
-             max="{{ (now + timedelta(days=90)).strftime('%Y-%m-%d') }}">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Pilih Sesi</label>
-      <select id="sesiSelect" name="id_sesi" class="form-select" required></select>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Jumlah Tiket</label>
-      <input type="number" name="jumlah_tiket" class="form-control" min="1" required>
-    </div>
-
-    <button type="submit" class="btn btn-success">Pesan Sekarang</button>
-    <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary">Batal</a>
-  </form>
-</div>
+  </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   const wahanaSelect = document.getElementById("wahanaSelect");
   const sesiSelect = document.getElementById("sesiSelect");
   const datePicker = document.getElementById("datePicker");
-  const form = document.getElementById("reservasiForm");
-
+  
+  // Mengambil ID wahana dari server (Jinja2)
   const idWahanaFromServer = "{{ id_wahana or '' }}";
 
+  // 1. Load Wahana
   try {
-    wahanaSelect.innerHTML = '';
+    wahanaSelect.innerHTML = ''; // Clear awal
     const defaultOpt = document.createElement('option');
     defaultOpt.value = '';
     defaultOpt.textContent = '-- Pilih Wahana --';
@@ -70,7 +120,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const opt = document.createElement("option");
         opt.value = w[0];
         opt.textContent = w[1];
-        // Set selected jika id_wahana sama
+        
+        // Auto select jika ada data dari server
         if (idWahanaFromServer && String(w[0]) === String(idWahanaFromServer)) {
           opt.selected = true;
         }
@@ -78,56 +129,74 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     } else {
       const opt = document.createElement("option");
-      opt.value = '';
       opt.textContent = 'Tidak ada wahana tersedia';
       wahanaSelect.appendChild(opt);
     }
   } catch (err) {
     console.error('Gagal memuat daftar wahana', err);
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = 'Error memuat wahana';
-    wahanaSelect.appendChild(opt);
+    wahanaSelect.innerHTML = '<option value="">Gagal memuat data</option>';
   }
 
-  // When date changes, load sessions
-  datePicker.addEventListener("change", async () => {
+  // 2. Fungsi Load Sesi
+  async function loadSesi() {
     const wahanaId = wahanaSelect.value;
     const selectedDate = datePicker.value;
-    sesiSelect.innerHTML = "";
+    
+    // Reset Sesi Select
+    sesiSelect.innerHTML = "<option value=''>Loading...</option>";
+    sesiSelect.disabled = true;
 
-    if (wahanaId && selectedDate) {
-      try {
-        const sesiRes = await axios.get(`/api/sesi/${wahanaId}/${selectedDate}`);
-        if (sesiRes.data && sesiRes.data.data && sesiRes.data.data.length) {
-          sesiRes.data.data.forEach(s => {
-            const opt = document.createElement("option");
-            opt.value = s[0];
-            opt.textContent = `${s[1]} — Rp ${s[3].toLocaleString()} (Kuota: ${s[2]})`;
-            sesiSelect.appendChild(opt);
-          });
-        } else {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'Tidak ada sesi tersedia untuk tanggal ini';
+    if (!wahanaId || !selectedDate) {
+      sesiSelect.innerHTML = "<option value=''>Pilih tanggal & wahana dulu</option>";
+      sesiSelect.disabled = false;
+      return;
+    }
+
+    try {
+      const sesiRes = await axios.get(`/api/sesi/${wahanaId}/${selectedDate}`);
+      sesiSelect.innerHTML = ""; // Clear Loading
+      
+      if (sesiRes.data && sesiRes.data.data && sesiRes.data.data.length) {
+        // Placeholder opsi
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "-- Pilih Jam Sesi --";
+        sesiSelect.appendChild(placeholder);
+
+        sesiRes.data.data.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s[0];
+          // Format text: Jam - Harga (Kuota)
+          opt.textContent = `${s[1]} — Rp ${s[3].toLocaleString()} (Sisa: ${s[2]})`;
           sesiSelect.appendChild(opt);
-        }
-      } catch (err) {
-        console.error('Gagal memuat sesi', err);
+        });
+      } else {
         const opt = document.createElement('option');
         opt.value = '';
-        opt.textContent = 'Error memuat sesi';
+        opt.textContent = 'Tidak ada sesi tersedia (Penuh/Tutup)';
         sesiSelect.appendChild(opt);
       }
+    } catch (err) {
+      console.error('Gagal memuat sesi', err);
+      sesiSelect.innerHTML = "<option value=''>Error server memuat sesi</option>";
+    } finally {
+      sesiSelect.disabled = false;
     }
-  });
+  }
 
-  // Auto load sessions if date and wahana already picked
-  wahanaSelect.addEventListener("change", () => datePicker.dispatchEvent(new Event("change")));
+  // 3. Event Listeners
+  datePicker.addEventListener("change", loadSesi);
+  wahanaSelect.addEventListener("change", loadSesi); // Load ulang sesi jika wahana diganti tapi tanggal sama
 
-  // Trigger sesi load jika wahana sudah terpilih dari awal
+  // 4. Initial Trigger jika data sudah ada dari server
   if (idWahanaFromServer) {
-    datePicker.dispatchEvent(new Event("change"));
+    // Kita tunggu sebentar agar datePicker siap (opsional, tapi aman)
+    setTimeout(() => {
+        // Jika tanggal juga sudah terisi otomatis oleh browser atau server
+        if(datePicker.value) {
+            loadSesi();
+        }
+    }, 100);
   }
 });
 </script>
