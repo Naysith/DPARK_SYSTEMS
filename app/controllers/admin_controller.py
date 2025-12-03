@@ -22,9 +22,10 @@ def admin_dashboard():
 
         cur.execute("""
             SELECT COUNT(*) 
-            FROM reservasi 
-            WHERE DATE(tanggal_reservasi) = CURDATE()
-            AND status_pembayaran = 'selesai'
+            FROM tiket t
+            JOIN reservasi r ON t.id_reservasi = r.id_reservasi
+            WHERE DATE(r.tanggal_reservasi) = CURDATE()
+            AND r.status_pembayaran = 'selesai'
         """)
         tiket_hari_ini = cur.fetchone()[0]
 

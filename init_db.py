@@ -56,7 +56,6 @@ CREATE TABLE IF NOT EXISTS pembayaran (
     jumlah_bayar INT,
     metode_pembayaran ENUM('BANK','QRIS'),
     FOREIGN KEY (id_reservasi) REFERENCES reservasi(id_reservasi) ON DELETE CASCADE
-
 );
 
 CREATE TABLE IF NOT EXISTS tiket (

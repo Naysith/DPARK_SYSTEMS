@@ -18,9 +18,10 @@
       {% endif %}
     {% endwith %}
 
-  <h3>Reservasi ID: {{ reservasi|col(0) }}</h3>
-  <p>Total Harga: Rp {{ reservasi|col(3) }}</p>
-  <p>Status: {{ reservasi|col(4) }}</p>
+  <!-- use dict keys provided by controllers instead of tuple/column indexes -->
+  <h3>Reservasi ID: {{ reservasi.id_reservasi }}</h3>
+  <p>Total Harga: Rp {{ "{:,.0f}".format(reservasi.total_harga) }}</p>
+  <p>Status: {{ reservasi.status_pembayaran }}</p>
 
     <form method="POST">
     <label for="metode_pembayaran">Metode Pembayaran:</label>
@@ -29,7 +30,8 @@
       <option value="QRIS">QRIS</option>
     </select>
 
-  <input type="hidden" name="jumlah_bayar" value="{{ reservasi|col(1) }}">
+  <!-- ensure jumlah_bayar is the reservation total_harga (not user id) -->
+  <input type="hidden" name="jumlah_bayar" value="{{ reservasi.total_harga }}">
 
         <button type="submit">Bayar Sekarang</button>
     </form>

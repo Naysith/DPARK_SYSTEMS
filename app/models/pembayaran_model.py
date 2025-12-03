@@ -8,7 +8,13 @@ def add_pembayaran(id_reservasi, form):
     Does NOT auto-send email. Returns a dict with keys: id_pembayaran, pdf_file, email_to, nama_user.
     """
     pdf_file = None
-    jumlah = int(form['jumlah_bayar'])
+
+    # Safely cast jumlah_bayar to int
+    try:
+        jumlah = int(form['jumlah_bayar'])
+    except (ValueError, TypeError):
+        raise ValueError(f"Invalid jumlah_bayar value: {form['jumlah_bayar']}")
+
     metode = form['metode_pembayaran']
 
     cur = mysql.connection.cursor()
@@ -39,7 +45,7 @@ def add_pembayaran(id_reservasi, form):
     """, (id_reservasi,))
     tiket_raw = cur.fetchall()
 
-        # Convert raw tuples → dicts and add QR codes
+    # Convert raw tuples → dicts and add QR codes
     tiket_list = []
     for row in tiket_raw:
         tiket_list.append({
@@ -47,7 +53,7 @@ def add_pembayaran(id_reservasi, form):
             "status_tiket": row[1],
             "nama_wahana": row[2],
             "nama_sesi": row[3],
-            "qr_buf": generate_qr_buffer(row[0]),  # ⬅️ QR HERE
+            "qr_buf": generate_qr_buffer(row[0]),
             "email": row[4],
             "nama_user": row[5]
         })
@@ -59,6 +65,7 @@ def add_pembayaran(id_reservasi, form):
         nama_user = tiket_list[0]["nama_user"]
         filepath, public_url = generate_ticket_pdf(tiket_list, id_reservasi, nama_user)
         pdf_file = public_url
+
     # --- Commit changes and close cursor ---
     mysql.connection.commit()
     cur.close()
