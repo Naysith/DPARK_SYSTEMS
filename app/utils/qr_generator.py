@@ -12,3 +12,4 @@ def generate_qr_buffer(data: str):
     img.save(buf, format="PNG")
     buf.seek(0)
     return buf  # return raw PNG bytes
+

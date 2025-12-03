@@ -19,8 +19,8 @@
     {% endwith %}
 
   <h3>Reservasi ID: {{ reservasi|col(0) }}</h3>
-  <p>Total Harga: Rp {{ reservasi|col(1) }}</p>
-  <p>Status: {{ reservasi|col(2) }}</p>
+  <p>Total Harga: Rp {{ reservasi|col(3) }}</p>
+  <p>Status: {{ reservasi|col(4) }}</p>
 
     <form method="POST">
     <label for="metode_pembayaran">Metode Pembayaran:</label>
