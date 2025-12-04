@@ -372,3 +372,74 @@ def validasi_admin():
         return handle_mysql_error(e, 'admin_bp.validasi_admin')
 
     return render_template('admin/validasi_admin.html', validasi=validasi)
+
+@admin_bp.route('/admin/laporan')
+@login_required
+@role_required('admin')
+def laporan_menu():
+    try:
+        cur = mysql.connection.cursor()
+        
+        # --- Daftar Pengunjung: All reservations with payment info ---
+        cur.execute("""
+            SELECT 
+                p.id_pengguna,
+                p.nama_pengguna,
+                p.email,
+                COUNT(t.id_tiket) AS jumlah_tiket,
+                w.nama_wahana,
+                r.tanggal_reservasi,
+                pb.metode_pembayaran,
+                pb.jumlah_bayar
+            FROM reservasi r
+            JOIN pengguna p ON r.id_pengguna = p.id_pengguna
+            JOIN tiket t ON r.id_reservasi = t.id_reservasi
+            JOIN sesi s ON t.id_sesi = s.id_sesi
+            JOIN wahana w ON s.id_wahana = w.id_wahana
+            LEFT JOIN pembayaran pb ON r.id_reservasi = pb.id_reservasi
+            WHERE r.status_pembayaran = 'selesai'
+            GROUP BY r.id_reservasi, p.id_pengguna
+            ORDER BY r.tanggal_reservasi DESC
+        """)
+        daftar_pengunjung = cur.fetchall()
+        
+        # --- Kunjungan Selesai: Only validated tickets with staff name ---
+        cur.execute("""
+            SELECT 
+                p.id_pengguna,
+                p.nama_pengguna,
+                p.email,
+                COUNT(t.id_tiket) AS jumlah_tiket,
+                w.nama_wahana,
+                r.tanggal_reservasi,
+                pb.metode_pembayaran,
+                pb.jumlah_bayar,
+                staff.nama_pengguna AS nama_staff
+            FROM validasi v
+            JOIN tiket t ON v.id_pengguna = t.id_reservasi OR t.id_tiket = (
+                SELECT id_tiket FROM tiket WHERE kode_tiket IN (
+                    SELECT kode_tiket FROM tiket WHERE id_reservasi IN (
+                        SELECT id_reservasi FROM reservasi WHERE id_pengguna = v.id_pengguna
+                    )
+                )
+            )
+            JOIN reservasi r ON t.id_reservasi = r.id_reservasi
+            JOIN pengguna p ON r.id_pengguna = p.id_pengguna
+            JOIN sesi s ON t.id_sesi = s.id_sesi
+            JOIN wahana w ON s.id_wahana = w.id_wahana
+            JOIN pengguna staff ON v.id_pengguna = staff.id_pengguna
+            LEFT JOIN pembayaran pb ON r.id_reservasi = pb.id_reservasi
+            WHERE t.status_tiket = 'sudah_digunakan'
+            GROUP BY r.id_reservasi, p.id_pengguna, staff.id_pengguna
+            ORDER BY v.waktu_validasi DESC
+        """)
+        kunjungan_selesai = cur.fetchall()
+        
+        cur.close()
+        
+    except Exception as e:
+        return handle_mysql_error(e, 'admin_bp.laporan_menu')
+    
+    return render_template('admin/laporan.html', 
+                         daftar_pengunjung=daftar_pengunjung,
+                         kunjungan_selesai=kunjungan_selesai)

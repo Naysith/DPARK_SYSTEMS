@@ -16,6 +16,7 @@
          {% set tiket_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'staff_bp.validasi_tiket' or active_page == 'tiket') else 'hover:text-[#00013E]' %}
          {% set wahana_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'wahana_bp.wahana_list' or active_page == 'wahana') else 'hover:text-[#00013E]' %}
          {% set staff_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'admin_bp.kelola_staff' or active_page == 'staff') else 'hover:text-[#00013E]' %}
+         {% set laporan_cls = 'text-[#00013E] poppins-bold underline' if (request.endpoint == 'admin_bp.laporan_menu' or active_page == 'laporan') else 'hover:text-[#00013E]' %}
         <a href="{{ dash_url }}"
             class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline  {{ dash_cls }}">
             <svg fill="none" stroke="currentColor" stroke-width="2" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
@@ -149,7 +150,7 @@
             </svg>
             <span>Wahana</span>
         </a>
-        <a href="#"
+        <a href="{{ url_for('admin_bp.laporan_menu') }}"
             class="flex items-center space-x-3 px-4 py-4 hover:font-bold rounded-md hover:text-[#00013E] hover:poppins-bold hover:underline {{ laporan_cls }}">
             <svg width="800px" height="800px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"
                 version="1.1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
