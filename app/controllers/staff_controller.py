@@ -82,8 +82,33 @@ def profile():
 @role_required('staff')
 def validasi_tiket():
     result = None
+    validasi_list = []
     try:
         cur = mysql.connection.cursor()
+
+        # --- Changed: fetch validated tickets directly from tiket/reservasi/sesi/wahana
+        # Select latest validation time for the wahana using a correlated subquery to avoid row multiplication.
+        cur.execute("""
+            SELECT
+                t.kode_tiket,
+                u.nama_pengguna,
+                w.nama_wahana,
+                (
+                    SELECT MAX(v.waktu_validasi)
+                    FROM validasi v
+                    WHERE v.id_wahana = w.id_wahana
+                ) AS waktu_validasi
+            FROM tiket t
+            JOIN sesi s ON t.id_sesi = s.id_sesi
+            JOIN wahana w ON s.id_wahana = w.id_wahana
+            JOIN reservasi r ON t.id_reservasi = r.id_reservasi
+            JOIN pengguna u ON r.id_pengguna = u.id_pengguna
+            WHERE t.status_tiket = 'sudah_digunakan'
+            GROUP BY t.id_tiket, t.kode_tiket, u.nama_pengguna, w.nama_wahana
+            ORDER BY waktu_validasi DESC
+            LIMIT 100
+        """)
+        validasi_list = cur.fetchall()
 
         if request.method == 'POST':
             if 'cari' in request.form:
@@ -137,14 +162,36 @@ def validasi_tiket():
                 flash('Tiket berhasil divalidasi dan dicatat di log validasi.', 'success')
                 result = None
 
+                # Refresh the recent list using the same stable query (avoid multiplication)
+                cur.execute("""
+                    SELECT
+                        t.kode_tiket,
+                        u.nama_pengguna,
+                        w.nama_wahana,
+                        (
+                            SELECT MAX(v.waktu_validasi)
+                            FROM validasi v
+                            WHERE v.id_wahana = w.id_wahana
+                        ) AS waktu_validasi
+                    FROM tiket t
+                    JOIN sesi s ON t.id_sesi = s.id_sesi
+                    JOIN wahana w ON s.id_wahana = w.id_wahana
+                    JOIN reservasi r ON t.id_reservasi = r.id_reservasi
+                    JOIN pengguna u ON r.id_pengguna = u.id_pengguna
+                    WHERE t.status_tiket = 'sudah_digunakan'
+                    GROUP BY t.id_tiket, t.kode_tiket, u.nama_pengguna, w.nama_wahana
+                    ORDER BY waktu_validasi DESC
+                    LIMIT 100
+                """)
+                validasi_list = cur.fetchall()
+
         cur.close()
     except Exception as e:
         handle_mysql_error(e, 'staff_bp.validasi_tiket')
         flash('Terjadi kesalahan saat memproses tiket.', 'danger')
 
-    return render_template('staff/validasi_tiket.html', result=result)
+    return render_template('staff/validasi_tiket.html', result=result, validasi_list=validasi_list)
 
-# ...existing code...
 @staff_bp.route('/staff/profile/update_contact', methods=['POST'])
 @login_required
 @role_required('staff')

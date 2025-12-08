@@ -25,13 +25,17 @@
             <div>
                 <div class="flex justify-end items-end mb-4">
                     <button class="text-white bg-[#32D583] py-2 px-4 rounded-lg me-5">Export Excel</button>
-                    <button onclick="openValidasiModal()" class="text-white bg-[#000264] py-2 px-4 rounded-lg">Cek Tiket</button>
+                    <button onclick="openValidasiModal()" class="text-white bg-[#000264] py-2 px-4 rounded-lg">Cek Tiket
+                    </button>
                 </div>
-                <table id="tablePengecekanTiket" class="py-8">
+
+                <!-- Table: order changed to: No | Kode Tiket | Nama Wahana | Tanggal Kunjungan | Nama Pelanggan -->
+                <table id="tablePengecekanTiket" class="py-8 w-full">
                     <thead class="table-dark">
                         <tr>
                             <th>No</th>
                             <th>Kode Tiket</th>
+                            <th>Nama Wahana</th>
                             <th>Tanggal Kunjungan</th>
                             <th>Nama Pelanggan</th>
                         </tr>
@@ -39,14 +43,21 @@
                     <tbody>
                         {% for v in validasi_list %}
                         <tr>
-                            <td>{{ loop . index }}</td>
-                            <td>{{ v[1] }}</td>
-                            <td>{{ v[2] . strftime('%d %B %Y %H:%M') }}</td>
-                            <td>{{ v[3] }}</td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ v[0] }}</td>                    <!-- kode_tiket -->
+                            <td>{{ v[2] }}</td>                    <!-- nama_wahana -->
+                            <td>
+                                {% if v[3] %}
+                                  {{ v[3].strftime('%d %B %Y %H:%M') if v[3] is not string else v[3] }}
+                                {% else %}
+                                  -
+                                {% endif %}
+                            </td>                                  <!-- waktu_validasi -->
+                            <td>{{ v[1] }}</td>                    <!-- nama_pengguna -->
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted">Belum ada data validasi</td>
+                            <td colspan="5" class="text-center text-muted">Belum ada data validasi</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -65,14 +76,235 @@
         </button>
     </div>
 </body>
+
+<!-- scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://cdn.tailwindcss.com/"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.tailwindcss.js"></script>
 <script>
-    new DataTable('#tablePengecekanTiket');
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        new DataTable('#tablePengecekanTiket', {
+            destroy: true,
+            responsive: true,
+            autoWidth: false,
+            columnDefs: [
+                { orderable: false, searchable: false, targets: 0 },
+                { defaultContent: '-', targets: '_all' }
+            ],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                paginate: { first: "Awal", last: "Akhir", next: "Lanjut", previous: "Kembali" },
+                emptyTable: "Belum ada data validasi"
+            }
+        });
+    } catch (err) {
+        console.warn('DataTable init error:', err);
+    }
+});
 
-    
+/* Build modal markup dynamically if not present and wire up AJAX handlers */
+function ensureValidasiModal() {
+    if (document.getElementById('modal-tiket')) return;
+
+    const modalHtml = `
+    <div id="modal-tiket" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div class="absolute inset-0 bg-black/50" id="modal-overlay"></div>
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-xl z-10 overflow-hidden">
+        <div class="px-6 py-4 border-b flex justify-between items-center">
+          <h3 class="text-lg font-semibold">Cek & Validasi Tiket</h3>
+          <button id="modal-close" class="text-gray-600 hover:text-gray-900">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Kode Tiket</label>
+            <div class="flex gap-2 mt-2">
+              <input id="modal-kode" type="text" class="flex-1 px-4 py-2 border rounded" placeholder="MASUKKAN-KODE-TIKET">
+              <button id="modal-cari" class="px-4 py-2 bg-[#00013E] text-white rounded">Cari</button>
+            </div>
+            <p id="modal-msg" class="text-sm text-red-600 mt-2 hidden"></p>
+          </div>
+
+          <div id="modal-result" class="hidden space-y-2">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-sm text-gray-600">Kode</label>
+                <div id="r-kode" class="mt-1 text-gray-800"></div>
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Status</label>
+                <div id="r-status" class="mt-1 text-gray-800"></div>
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Sesi</label>
+                <div id="r-sesi" class="mt-1 text-gray-800"></div>
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Waktu</label>
+                <div id="r-waktu" class="mt-1 text-gray-800"></div>
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Wahana</label>
+                <div id="r-wahana" class="mt-1 text-gray-800"></div>
+              </div>
+            </div>
+
+            <div class="pt-3 flex justify-end gap-2">
+              <button id="modal-validate" class="px-4 py-2 bg-green-600 text-white rounded" disabled>Validasi</button>
+              <button id="modal-close-2" class="px-4 py-2 bg-gray-200 rounded">Tutup</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = modalHtml;
+    document.body.appendChild(wrapper);
+
+    // wire events
+    const modal = document.getElementById('modal-tiket');
+    const overlay = document.getElementById('modal-overlay');
+    const btnClose = document.getElementById('modal-close');
+    const btnClose2 = document.getElementById('modal-close-2');
+    const btnCari = document.getElementById('modal-cari');
+    const inputKode = document.getElementById('modal-kode');
+    const msg = document.getElementById('modal-msg');
+    const resultSection = document.getElementById('modal-result');
+    const btnValidasi = document.getElementById('modal-validate');
+
+    const clearResult = () => {
+        resultSection.classList.add('hidden');
+        msg.classList.add('hidden');
+        msg.textContent = '';
+        btnValidasi.disabled = true;
+        document.getElementById('r-kode').textContent = '';
+        document.getElementById('r-status').textContent = '';
+        document.getElementById('r-sesi').textContent = '';
+        document.getElementById('r-waktu').textContent = '';
+        document.getElementById('r-wahana').textContent = '';
+        btnValidasi.dataset.idTiket = '';
+        btnValidasi.dataset.idWahana = '';
+    };
+
+    // central hide/show helpers
+    const hideModal = (m) => {
+        if (!m) return;
+        m.classList.add('hidden');
+        m.style.display = 'none';
+    };
+    const showModal = (m) => {
+        if (!m) return;
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+    };
+
+    overlay.addEventListener('click', () => hideModal(modal));
+    btnClose.addEventListener('click', () => hideModal(modal));
+    btnClose2.addEventListener('click', () => hideModal(modal));
+
+    btnCari.addEventListener('click', async () => {
+        const kode = inputKode.value && inputKode.value.trim();
+        clearResult();
+        if (!kode) {
+            msg.textContent = 'Masukkan kode tiket.';
+            msg.classList.remove('hidden');
+            return;
+        }
+        msg.classList.add('hidden');
+
+        try {
+            btnCari.disabled = true;
+            const resp = await fetch('{{ url_for("staff_bp.api_cek_tiket") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kode_tiket: kode })
+            });
+            const data = await resp.json();
+            if (!data.success) {
+                msg.textContent = data.message || 'Tiket tidak ditemukan';
+                msg.classList.remove('hidden');
+                return;
+            }
+            const d = data.data;
+            // populate result
+            document.getElementById('r-kode').textContent = d.kode_tiket || '-';
+            document.getElementById('r-status').textContent = d.status_tiket || '-';
+            document.getElementById('r-sesi').textContent = d.nama_sesi || '-';
+            document.getElementById('r-waktu').textContent = d.waktu_mulai ? new Date(d.waktu_mulai).toLocaleString() : '-';
+            document.getElementById('r-wahana').textContent = d.nama_wahana || '-';
+            btnValidasi.dataset.idTiket = d.id_tiket;
+            btnValidasi.dataset.idWahana = d.id_wahana;
+            // enable validate only if belum_digunakan
+            if (d.status_tiket === 'belum_digunakan') {
+                btnValidasi.disabled = false;
+            } else {
+                btnValidasi.disabled = true;
+            }
+            resultSection.classList.remove('hidden');
+        } catch (err) {
+            console.error(err);
+            msg.textContent = 'Terjadi kesalahan saat mencari tiket.';
+            msg.classList.remove('hidden');
+        } finally {
+            btnCari.disabled = false;
+        }
+    });
+
+    btnValidasi.addEventListener('click', async () => {
+        const id_tiket = btnValidasi.dataset.idTiket;
+        const id_wahana = btnValidasi.dataset.idWahana;
+        if (!id_tiket || !id_wahana) return;
+
+        btnValidasi.disabled = true;
+        try {
+            const resp = await fetch('{{ url_for("staff_bp.api_validasi") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_tiket: id_tiket, id_wahana: id_wahana })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                // show success, close modal and reload to update table
+                alert('Tiket berhasil divalidasi.');
+                hideModal(modal);
+                window.location.reload();
+            } else {
+                alert(data.message || 'Gagal memvalidasi tiket.');
+                btnValidasi.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Terjadi kesalahan saat memvalidasi.');
+            btnValidasi.disabled = false;
+        }
+    });
+}
+
+/* Called when user clicks the "Cek Tiket" button */
+function openValidasiModal() {
+    ensureValidasiModal();
+    const modal = document.getElementById('modal-tiket');
+    if (modal) {
+        // reset fields
+        const input = document.getElementById('modal-kode');
+        if (input) input.value = '';
+        const msg = document.getElementById('modal-msg');
+        if (msg) { msg.textContent = ''; msg.classList.add('hidden'); }
+        const result = document.getElementById('modal-result');
+        if (result) result.classList.add('hidden');
+        // show modal via helper (ensures inline display is set)
+        if (typeof showModal === 'function') {
+            showModal(modal);
+        } else {
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+    }
+}
 </script>
 
 </html>
