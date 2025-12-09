@@ -303,10 +303,13 @@ def api_cek_tiket():
                 s.waktu_mulai,
                 s.waktu_selesai,
                 w.id_wahana,
-                w.nama_wahana
+                w.nama_wahana,
+                u.nama_pengguna
             FROM tiket t
             JOIN sesi s ON t.id_sesi = s.id_sesi
             JOIN wahana w ON s.id_wahana = w.id_wahana
+            JOIN reservasi r ON t.id_reservasi = r.id_reservasi
+            JOIN pengguna u ON r.id_pengguna = u.id_pengguna
             WHERE t.kode_tiket = %s
         """, (kode_tiket,))
         row = cur.fetchone()
@@ -325,7 +328,8 @@ def api_cek_tiket():
             'waktu_mulai': row[5].isoformat() if hasattr(row[5], 'isoformat') else row[5],
             'waktu_selesai': row[6].isoformat() if hasattr(row[6], 'isoformat') else row[6],
             'id_wahana': row[7],
-            'nama_wahana': row[8]
+            'nama_wahana': row[8],
+            'nama_pengguna': row[9]
         }
         return jsonify(success=True, data=result)
     except Exception as e:

@@ -29,22 +29,22 @@
                     </button>
                 </div>
 
-                <!-- Table: order changed to: No | Kode Tiket | Nama Wahana | Tanggal Kunjungan | Nama Pelanggan -->
+                <!-- Table: order changed to: No | Nama Pengguna | Nama Wahana | Tanggal Kunjungan | Kode Tiket -->
                 <table id="tablePengecekanTiket" class="py-8 w-full">
                     <thead class="table-dark">
                         <tr>
                             <th>No</th>
-                            <th>Kode Tiket</th>
+                            <th>Nama Pengguna</th>
                             <th>Nama Wahana</th>
                             <th>Tanggal Kunjungan</th>
-                            <th>Nama Pelanggan</th>
+                            <th>Kode Tiket</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for v in validasi_list %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ v[0] }}</td>                    <!-- kode_tiket -->
+                            <td>{{ v[0] }}</td>                    <!-- nama_pengguna -->
                             <td>{{ v[2] }}</td>                    <!-- nama_wahana -->
                             <td>
                                 {% if v[3] %}
@@ -53,7 +53,7 @@
                                   -
                                 {% endif %}
                             </td>                                  <!-- waktu_validasi -->
-                            <td>{{ v[1] }}</td>                    <!-- nama_pengguna -->
+                            <td>{{ v[1] }}</td>                    <!-- kode_tiket -->
                         </tr>
                         {% else %}
                         <tr>
@@ -131,8 +131,8 @@ function ensureValidasiModal() {
           <div id="modal-result" class="hidden space-y-2">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="text-sm text-gray-600">Kode</label>
-                <div id="r-kode" class="mt-1 text-gray-800"></div>
+                <label class="text-sm text-gray-600">Nama Pengguna</label>
+                <div id="r-nama" class="mt-1 text-gray-800"></div>
               </div>
               <div>
                 <label class="text-sm text-gray-600">Status</label>
@@ -181,7 +181,7 @@ function ensureValidasiModal() {
         msg.classList.add('hidden');
         msg.textContent = '';
         btnValidasi.disabled = true;
-        document.getElementById('r-kode').textContent = '';
+      document.getElementById('r-nama').textContent = '';
         document.getElementById('r-status').textContent = '';
         document.getElementById('r-sesi').textContent = '';
         document.getElementById('r-waktu').textContent = '';
@@ -231,7 +231,7 @@ function ensureValidasiModal() {
             }
             const d = data.data;
             // populate result
-            document.getElementById('r-kode').textContent = d.kode_tiket || '-';
+            document.getElementById('r-nama').textContent = d.nama_pengguna || '-';
             document.getElementById('r-status').textContent = d.status_tiket || '-';
             document.getElementById('r-sesi').textContent = d.nama_sesi || '-';
             document.getElementById('r-waktu').textContent = d.waktu_mulai ? new Date(d.waktu_mulai).toLocaleString() : '-';
