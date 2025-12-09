@@ -38,9 +38,9 @@
         <div id="modalStep2" class="hidden">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Kode Tiket</label>
-                    <input type="text" id="res-kode"
-                        class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700 font-medium" readonly>
+                  <label class="block text-sm font-medium text-gray-700">Nama Pengguna</label>
+                  <input type="text" id="res-kode"
+                    class="w-full border-0 rounded-lg p-3 bg-gray-100 text-gray-700 font-medium" readonly>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Nama Wahana</label>
@@ -124,6 +124,11 @@
           return;
         }
         const d = obj.body.data;
+        // show user's name in the top field (replacing kode display)
+        document.getElementById('res-kode').value = d.nama_pengguna || '';
+        // also populate the dedicated pelanggan field for compatibility
+        const resPelanggan = document.getElementById('res-pelanggan');
+        if (resPelanggan) resPelanggan.value = d.nama_pengguna || '';
         document.getElementById('res-wahana').textContent = d.nama_wahana;
         document.getElementById('res-sesi').textContent = d.nama_sesi;
         document.getElementById('res-waktu').textContent = (d.waktu_mulai || '') + ' — ' + (d.waktu_selesai || '');

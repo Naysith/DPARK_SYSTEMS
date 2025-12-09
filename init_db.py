@@ -76,6 +76,17 @@ CREATE TABLE IF NOT EXISTS validasi (
     FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna),
     FOREIGN KEY (id_wahana) REFERENCES wahana(id_wahana)
 );
+
+-- Table for password reset tokens for pengguna
+CREATE TABLE IF NOT EXISTS password_resets (
+    id_reset INT AUTO_INCREMENT PRIMARY KEY,
+    id_pengguna INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used TINYINT(1) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna) ON DELETE CASCADE
+);
 """
 
 @app.cli.command("init-db")

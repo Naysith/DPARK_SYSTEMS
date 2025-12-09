@@ -1,56 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Pembayaran Berhasil</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Pembayaran Berhasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/input.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/css/output.css') }}">
 </head>
-<body>
-    <h1>✅ Pembayaran Berhasil!</h1>
-        <p>Pembayaran berhasil. Di bawah adalah e-ticket Anda.</p>
-        {% if pdf_file %}
-            <p><a href="{{ pdf_file }}" target="_blank">📥 Download PDF Tiket</a></p>
-            <div style="margin-top:1rem;">
-                <iframe src="{{ pdf_file }}" width="100%" height="600px"></iframe>
-            </div>
-        {% endif %}
+<body class="min-h-screen bg-white poppins-regular flex items-center justify-center p-6">
 
-            {% if id_pembayaran %}
-                <!-- Trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmSendModal">
-                    Kirim tiket ke email saya
-                </button>
+  <div class="w-full max-w-4xl bg-white shadow-xl rounded-xl overflow-hidden">
+    <div class="p-6 md:p-8">
+      <div class="flex items-center gap-4">
+        <img src="{{ url_for('static', filename='src/images/logo-brand.png') }}" alt="logo" class="h-10">
+        <h1 class="text-2xl font-bold text-gray-900">✅ Pembayaran Berhasil!</h1>
+      </div>
 
-                <!-- Confirmation Modal -->
-                <div class="modal fade" id="confirmSendModal" tabindex="-1" aria-labelledby="confirmSendModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="confirmSendModalLabel">Konfirmasi Pengiriman</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                Apakah Anda yakin ingin mengirim tiket ke email Anda sekarang?
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <form id="sendEmailForm" method="POST" action="{{ url_for('reservasi_bp.pembayaran_send_email', id_pembayaran=id_pembayaran) }}">
-                                    <button type="submit" class="btn btn-primary">Ya, kirim</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                    {% endif %}
+      <p class="mt-3 text-gray-600">Pembayaran berhasil. Berikut e-ticket Anda.</p>
 
-                {% if sending %}
-                    <div class="alert alert-info mt-3">Email sedang dikirim. Anda akan menerimanya sebentar lagi.</div>
-                {% endif %}
+      {% if pdf_file %}
+      <div class="mt-6 flex flex-col md:flex-row gap-4 items-start">
+        <a href="{{ pdf_file }}" target="_blank"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-[#00013E] text-white rounded-lg hover:bg-[#030452']">
+          📥 Download PDF Tiket
+        </a>
+        <a href="{{ pdf_file }}" target="_blank" download
+           class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200">
+          🔗 Buka di Tab Baru
+        </a>
+      </div>
 
-            <p>
-                <a href="{{ url_for('user_bp.user_dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
-            </p>
+      <div class="mt-6 border rounded overflow-hidden">
+        <iframe src="{{ pdf_file }}" class="w-full h-[640px]"></iframe>
+      </div>
+      {% else %}
+      <div class="mt-6 text-sm text-gray-500">E-ticket belum tersedia.</div>
+      {% endif %}
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <div class="mt-6 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          {% if sending %}
+            <span class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded">
+              📨 Email sedang dikirim...
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3">
+          {% if id_pembayaran %}
+            <button id="open-send-modal"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              Kirim tiket ke email saya
+            </button>
+          {% endif %}
+
+          <a href="{{ url_for('user_bp.user_dashboard') }}"
+             class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200">
+            Kembali ke Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal (Tailwind) -->
+  <div id="sendModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" id="sendModalOverlay"></div>
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg z-10 overflow-hidden">
+      <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h3 class="text-lg font-semibold">Konfirmasi Pengiriman</h3>
+        <button id="closeSendModal" class="text-gray-600 hover:text-gray-900 text-2xl leading-none">&times;</button>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-700 mb-4">Apakah Anda yakin ingin mengirim tiket ke email Anda sekarang?</p>
+        <div class="flex justify-end gap-3">
+          <button id="cancelSend" class="px-4 py-2 bg-gray-200 rounded">Batal</button>
+
+          <form id="sendEmailForm" method="POST" action="{{ url_for('reservasi_bp.pembayaran_send_email', id_pembayaran=id_pembayaran) }}">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Ya, kirim</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Simple modal show/hide
+  (function(){
+    const openBtn = document.getElementById('open-send-modal');
+    const modal = document.getElementById('sendModal');
+    const overlay = document.getElementById('sendModalOverlay');
+    const closeBtn = document.getElementById('closeSendModal');
+    const cancelBtn = document.getElementById('cancelSend');
+
+    function showModal() {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+    }
+    function hideModal() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+
+    if (openBtn) openBtn.addEventListener('click', showModal);
+    if (overlay) overlay.addEventListener('click', hideModal);
+    if (closeBtn) closeBtn.addEventListener('click', hideModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+  })();
+</script>
 </body>
 </html>

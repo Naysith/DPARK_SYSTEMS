@@ -3,116 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <title>Menu Laporan - Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/input.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'src/css/output.css') }}">
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.tailwindcss.css">
 </head>
-<body class="p-4 bg-light">
-  <div class="container-fluid">
-    <h2 class="mb-4">Menu Laporan</h2>
+<body class="bg-white poppins-regular">
 
-    <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-secondary mb-3">← Kembali</a>
+<div class="flex h-screen">
+  <!-- Sidebar -->
+  {% include 'UI-components/sidebar.html' %}
+  <!-- End Sidebar -->
 
-    <!-- Daftar Pengunjung -->
-    <div class="card mb-5">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Daftar Pengunjung</h5>
+  <main class="flex-1 h-screen overflow-y-auto bg-white p-10">
+    <!-- Top bar -->
+    {% include 'UI-components/topbar.html' %}
+    <!-- End Top bar -->
+
+    <div>
+      <div id="global-alert" class="hidden mb-6 p-4 rounded-lg text-sm"></div>
+
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold">Menu Laporan</h2>
+        <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="text-sm bg-gray-200 px-3 py-2 rounded hover:bg-gray-300">← Kembali</a>
       </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover align-middle">
-            <thead class="table-light">
+
+      <!-- Daftar Pengunjung -->
+      <div class="mb-8 bg-white rounded-lg shadow-sm border">
+        <div class="px-6 py-4 border-b bg-[#000264] text-white rounded-t-lg">
+          <h5 class="mb-0">Daftar Pengunjung</h5>
+        </div>
+        <div class="p-4 overflow-x-auto">
+          <table id="tableDaftarPengunjung" class="min-w-full table-auto stripe hover">
+            <thead class="bg-gray-50">
               <tr>
-                <th>ID Pengguna</th>
-                <th>Nama Pengguna</th>
-                <th>Email</th>
-                <th>Jumlah Tiket</th>
-                <th>Jenis Wahana</th>
-                <th>Tanggal Reservasi</th>
-                <th>Metode Pembayaran</th>
-                <th>Total Bayar</th>
+                <th class="px-3 py-2 text-left">ID Pengguna</th>
+                <th class="px-3 py-2 text-left">Nama Pengguna</th>
+                <th class="px-3 py-2 text-left">Email</th>
+                <th class="px-3 py-2 text-left">Jumlah Tiket</th>
+                <th class="px-3 py-2 text-left">Jenis Wahana</th>
+                <th class="px-3 py-2 text-left">Tanggal Reservasi</th>
+                <th class="px-3 py-2 text-left">Metode Pembayaran</th>
+                <th class="px-3 py-2 text-left">Total Bayar</th>
               </tr>
             </thead>
             <tbody>
               {% for row in daftar_pengunjung %}
               <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td><span class="badge bg-info">{{ row[3] }}</span></td>
-                <td>{{ row[4] }}</td>
-                <td>{{ row[5].strftime("%d-%m-%Y %H:%M") if row[5] else '-' }}</td>
-                <td>
+                <td class="px-3 py-2">{{ row[0] }}</td>
+                <td class="px-3 py-2">{{ row[1] }}</td>
+                <td class="px-3 py-2">{{ row[2] }}</td>
+                <td class="px-3 py-2"><span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ row[3] }}</span></td>
+                <td class="px-3 py-2">{{ row[4] }}</td>
+                <td class="px-3 py-2">{{ row[5].strftime("%d-%m-%Y %H:%M") if row[5] else '-' }}</td>
+                <td class="px-3 py-2">
                   {% if row[6] %}
-                    <span class="badge bg-success">{{ row[6] }}</span>
+                    <span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded">{{ row[6] }}</span>
                   {% else %}
-                    <span class="badge bg-warning">Belum Bayar</span>
+                    <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Belum Bayar</span>
                   {% endif %}
                 </td>
-                <td class="fw-bold">Rp {{ "{:,.0f}".format(row[7]) if row[7] else "0" }}</td>
+                <td class="px-3 py-2 font-semibold">Rp {{ "{:,.0f}".format(row[7]) if row[7] else "0" }}</td>
               </tr>
               {% else %}
               <tr>
-                <td colspan="8" class="text-center text-muted">Tidak ada data pengunjung</td>
+                <td colspan="8" class="px-3 py-6 text-center text-gray-500">Tidak ada data pengunjung</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
 
-    <!-- Kunjungan Selesai -->
-    <div class="card">
-      <div class="card-header bg-success text-white">
-        <h5 class="mb-0">Kunjungan Selesai</h5>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover align-middle">
-            <thead class="table-light">
+      <!-- Kunjungan Selesai -->
+      <div class="mb-8 bg-white rounded-lg shadow-sm border">
+        <div class="px-6 py-4 border-b bg-green-600 text-white rounded-t-lg">
+          <h5 class="mb-0">Kunjungan Selesai</h5>
+        </div>
+        <div class="p-4 overflow-x-auto">
+          <table id="tableKunjunganSelesai" class="min-w-full table-auto stripe hover">
+            <thead class="bg-gray-50">
               <tr>
-                <th>ID Pengguna</th>
-                <th>Nama Pengguna</th>
-                <th>Email</th>
-                <th>Jumlah Tiket</th>
-                <th>Jenis Wahana</th>
-                <th>Tanggal Reservasi</th>
-                <th>Metode Pembayaran</th>
-                <th>Total Bayar</th>
-                <th>Nama Staff Validator</th>
+                <th class="px-3 py-2 text-left">ID Pengguna</th>
+                <th class="px-3 py-2 text-left">Nama Pengguna</th>
+                <th class="px-3 py-2 text-left">Email</th>
+                <th class="px-3 py-2 text-left">Jumlah Tiket</th>
+                <th class="px-3 py-2 text-left">Jenis Wahana</th>
+                <th class="px-3 py-2 text-left">Tanggal Reservasi</th>
+                <th class="px-3 py-2 text-left">Metode Pembayaran</th>
+                <th class="px-3 py-2 text-left">Total Bayar</th>
+                <th class="px-3 py-2 text-left">Nama Staff Validator</th>
               </tr>
             </thead>
             <tbody>
               {% for row in kunjungan_selesai %}
               <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td><span class="badge bg-info">{{ row[3] }}</span></td>
-                <td>{{ row[4] }}</td>
-                <td>{{ row[5].strftime("%d-%m-%Y %H:%M") if row[5] else '-' }}</td>
-                <td>
+                <td class="px-3 py-2">{{ row[0] }}</td>
+                <td class="px-3 py-2">{{ row[1] }}</td>
+                <td class="px-3 py-2">{{ row[2] }}</td>
+                <td class="px-3 py-2"><span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ row[3] }}</span></td>
+                <td class="px-3 py-2">{{ row[4] }}</td>
+                <td class="px-3 py-2">{{ row[5].strftime("%d-%m-%Y %H:%M") if row[5] else '-' }}</td>
+                <td class="px-3 py-2">
                   {% if row[6] %}
-                    <span class="badge bg-success">{{ row[6] }}</span>
+                    <span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded">{{ row[6] }}</span>
                   {% else %}
-                    <span class="badge bg-warning">-</span>
+                    <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded">-</span>
                   {% endif %}
                 </td>
-                <td class="fw-bold">Rp {{ "{:,.0f}".format(row[7]) if row[7] else "0" }}</td>
-                <td>{{ row[8] }}</td>
+                <td class="px-3 py-2 font-semibold">Rp {{ "{:,.0f}".format(row[7]) if row[7] else "0" }}</td>
+                <td class="px-3 py-2">{{ row[8] }}</td>
               </tr>
               {% else %}
               <tr>
-                <td colspan="9" class="text-center text-muted">Tidak ada data kunjungan selesai</td>
+                <td class="px-3 py-6 text-center text-gray-500">Tidak ada data kunjungan selesai</td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
+                <td class="px-3 py-6"></td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
+  </main>
 
-  </div>
+  <button
+    class="fixed bottom-6 right-6 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-lg hover:bg-red-600">
+    ?
+  </button>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.tailwindcss.com/"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.tailwindcss.js"></script>
+<script>
+  // inisialisasi DataTables untuk kedua tabel
+  new DataTable('#tableDaftarPengunjung', { perPage: 10, searchable: true });
+  new DataTable('#tableKunjunganSelesai', { perPage: 10, searchable: true });
+
+  // tampilkan flash message jika ada
+  (function(){
+    const flashMessage = sessionStorage.getItem('flashMessage');
+    if (flashMessage) {
+      const alertBox = document.getElementById('global-alert');
+      if (alertBox) {
+        alertBox.textContent = flashMessage;
+        alertBox.className = 'mb-6 p-4 rounded-lg text-sm bg-green-100 text-green-700';
+        alertBox.classList.remove('hidden');
+        sessionStorage.removeItem('flashMessage');
+      }
+    }
+  })();
+</script>
 </body>
 </html>
