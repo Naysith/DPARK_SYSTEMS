@@ -84,29 +84,7 @@
                             </div>
 
                             <div class="h-64">
-                                <div class="flex items-end h-full gap-2 md:gap-4 px-2">
-                                    <div class="flex flex-col justify-between h-full text-xs text-gray-400 pb-6" style="height: calc(100% - 1.25rem);">
-                                        {% for t in chart_ticks %}
-                                            <span>{{ t }}</span>
-                                        {% endfor %}
-                                    </div>
-
-                                    <div class="flex-1 flex justify-between items-end h-full border-l border-b border-gray-200 pb-1 px-2">
-                                        {% for i in range(7) %}
-                                            {% set cnt = weekly_counts[i] %}
-                                            {% if chart_max %}
-                                                {% set height = (cnt * 100) / chart_max %}
-                                            {% else %}
-                                                {% set height = 5 %}
-                                            {% endif %}
-                                            <div class="flex flex-col items-center w-full" title="{{ weekly_labels[i] }}">
-                                                <div class="w-4/5 md:w-3/5 rounded-t-sm"style="height: {{ '%.1f' % height }}%; background-color: {{ '#312e81' if cnt == chart_max and cnt>0 else '#6366f1' }};">
-                                                </div>
-                                                <span class="text-xs text-gray-500 mt-1">{{ weekly_labels[i] }}</span>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                                <canvas id="pengunjungChart" style="width:100%; height:100%;"></canvas>
                             </div>
                             
                         </div>
@@ -141,7 +119,56 @@
             ?
         </button>
     </div>
-</body>
+<!-- Chart.js: render pengunjung last 7 days -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function(){
+        try {
+            const labels = JSON.parse(`{{ weekly_labels|tojson|safe }}`);
+            const data = JSON.parse(`{{ weekly_counts|tojson|safe }}`);
+            const chartMax = Number(`{{ chart_max|default(0) }}`);
+
+            const canvas = document.getElementById('pengunjungChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pengunjung',
+                        data: data,
+                        backgroundColor: labels.map((_, i) =>
+                            data[i] === chartMax && data[i] > 0
+                                ? '#312e81'
+                                : '#6366f1'
+                        ),
+                        borderRadius: 6,
+                        maxBarThickness: 36
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: chartMax + 1,
+                            ticks: {
+                                stepSize: Math.max(1, Math.ceil((chartMax || 5) / 5))
+                            }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } catch (e) {
+            console.error('Chart init failed', e);
+        }
+    })();
+</script>
 <script>
     (function() {
         const dateEl = document.getElementById('date-display');

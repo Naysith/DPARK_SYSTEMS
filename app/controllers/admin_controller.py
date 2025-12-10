@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import datetime as _dt
 from flask import Blueprint, render_template, session
 from app.utils.helpers import login_required, role_required
 from app.utils.sesi_auto import generate_auto_sesi
@@ -53,19 +54,37 @@ def admin_dashboard():
         """)
         pendapatan_bulan_ini = cur.fetchone()[0] or 0
 
-        # Statistik 7 hari terakhir
+        # Statistik 7 hari terakhir (menghitung pengunjung nyata dari tabel `validasi`)
+        # Gunakan waktu_validasi sehingga grafik merepresentasikan kunjungan yang benar-benar terjadi
         today = date.today()
         start_date = today - timedelta(days=6)
         cur.execute("""
-            SELECT DATE(tanggal_reservasi) AS d, COUNT(*) AS cnt
-            FROM reservasi
-            WHERE DATE(tanggal_reservasi) BETWEEN %s AND %s
-              AND status_pembayaran = 'selesai'
-            GROUP BY DATE(tanggal_reservasi)
-            ORDER BY DATE(tanggal_reservasi)
+            SELECT DATE(waktu_validasi) AS d, COUNT(*) AS cnt
+            FROM validasi
+            WHERE DATE(waktu_validasi) BETWEEN %s AND %s
+            GROUP BY DATE(waktu_validasi)
+            ORDER BY DATE(waktu_validasi)
         """, (start_date, today))
         rows = cur.fetchall()
-        counts_map = {r[0]: r[1] for r in rows}
+
+        # normalisasi keys ke datetime.date (some connectors may return datetime.date already)
+        counts_map = {}
+        for r in rows:
+            key = r[0]
+            # convert datetime -> date, and parse strings if necessary
+            try:
+                if isinstance(key, _dt.datetime):
+                    key = key.date()
+                elif isinstance(key, str):
+                    # expect 'YYYY-MM-DD' from some connectors
+                    try:
+                        key = _dt.datetime.strptime(key, '%Y-%m-%d').date()
+                    except Exception:
+                        # fallback: leave as-is
+                        pass
+            except Exception:
+                pass
+            counts_map[key] = r[1]
 
         weekly_labels = []
         weekly_counts = []
@@ -403,35 +422,41 @@ def laporan_menu():
         """)
         daftar_pengunjung = cur.fetchall()
         
-        # --- Kunjungan Selesai: Only validated tickets with staff name ---
+        # --- Kunjungan Selesai: reservations that have at least one used ticket ---
+        # Note: validasi table does not reference tiket/reservasi directly, so we determine
+        # completed visits by checking tiket.status_tiket = 'sudah_digunakan'.
+        # For the "nama_staff" column we pick the latest validator for the wahana (if any).
         cur.execute("""
-            SELECT 
+            SELECT
                 p.id_pengguna,
                 p.nama_pengguna,
                 p.email,
                 COUNT(t.id_tiket) AS jumlah_tiket,
                 w.nama_wahana,
-                r.tanggal_reservasi,
+                (
+                    SELECT MAX(v.waktu_validasi)
+                    FROM validasi v
+                    WHERE v.id_wahana = w.id_wahana
+                ) AS waktu_validasi,
                 pb.metode_pembayaran,
                 pb.jumlah_bayar,
-                staff.nama_pengguna AS nama_staff
-            FROM validasi v
-            JOIN tiket t ON v.id_pengguna = t.id_reservasi OR t.id_tiket = (
-                SELECT id_tiket FROM tiket WHERE kode_tiket IN (
-                    SELECT kode_tiket FROM tiket WHERE id_reservasi IN (
-                        SELECT id_reservasi FROM reservasi WHERE id_pengguna = v.id_pengguna
-                    )
-                )
-            )
+                (
+                    SELECT staff.nama_pengguna
+                    FROM validasi v
+                    JOIN pengguna staff ON v.id_pengguna = staff.id_pengguna
+                    WHERE v.id_wahana = w.id_wahana
+                    ORDER BY v.waktu_validasi DESC
+                    LIMIT 1
+                ) AS nama_staff
+            FROM tiket t
             JOIN reservasi r ON t.id_reservasi = r.id_reservasi
             JOIN pengguna p ON r.id_pengguna = p.id_pengguna
             JOIN sesi s ON t.id_sesi = s.id_sesi
             JOIN wahana w ON s.id_wahana = w.id_wahana
-            JOIN pengguna staff ON v.id_pengguna = staff.id_pengguna
             LEFT JOIN pembayaran pb ON r.id_reservasi = pb.id_reservasi
             WHERE t.status_tiket = 'sudah_digunakan'
-            GROUP BY r.id_reservasi, p.id_pengguna, staff.id_pengguna
-            ORDER BY v.waktu_validasi DESC
+            GROUP BY r.id_reservasi, p.id_pengguna, w.id_wahana, pb.metode_pembayaran, pb.jumlah_bayar
+            ORDER BY waktu_validasi DESC
         """)
         kunjungan_selesai = cur.fetchall()
         
